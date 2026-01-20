@@ -128,7 +128,7 @@ npm run build
 
 Production-ready files will be generated in the `dist/` folder.
 
-5. **Preview Production Build** (Optional)
+5. **Preview Production Build** sssss
 
 ```bash
 npm run preview
