@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { FileText, Plus, Trash2, Download } from 'lucide-react';
 import { toast } from 'react-toastify';
 import html2pdf from 'html2pdf.js';
+import html2canvas from 'html2canvas';
 import logoImg from '../Image/logo.png';
 import varsityNameImg from '../Image/varsitityName.png';
 import footerImg from '../Image/footer.png';
@@ -560,8 +561,8 @@ const AssignmentCover = ({ data }) => {
         {`
           .preview-wrapper * { margin: 0; padding: 0; box-sizing: border-box; }
           .preview-wrapper { font-family: 'Times New Roman', Times, serif; }
-          .preview-wrapper .page { width: 210mm; min-height: 297mm; background: white; padding: 10mm; position: relative; }
-          .preview-wrapper .border-frame { border: 2px solid #1a1a50; height: 275mm; padding: 15px 30px; position: relative; display: flex; flex-direction: column; }
+          .preview-wrapper .page { width: 210mm; height: 297mm; min-height: 297mm; max-height: 297mm; background: white; padding: 10mm; position: relative; margin: 0 auto; overflow: hidden; page-break-after: avoid; }
+          .preview-wrapper .border-frame { border: 2px solid #1a1a50; height: 275mm; max-height: 275mm; padding: 15px 30px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
           .preview-wrapper .watermark { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 350px; opacity: 0.15; pointer-events: none; z-index: 0; }
           .preview-wrapper .content { z-index: 1; position: relative; display: flex; flex-direction: column; height: 100%; }
           .preview-wrapper .header { text-align: center; margin-bottom: 15px; }
@@ -589,10 +590,14 @@ const AssignmentCover = ({ data }) => {
           @media print {
             .preview-wrapper .page { 
               width: 210mm; 
-              height: 297mm; 
-              margin: 0; 
-              padding: 10mm;
-              page-break-after: always;
+              height: 297mm !important; 
+              max-height: 297mm !important;
+              min-height: 297mm !important;
+              margin: 0 !important; 
+              padding: 10mm !important;
+              page-break-after: avoid !important;
+              page-break-before: avoid !important;
+              overflow: hidden !important;
             }
             .preview-wrapper .teacher-box {
               background-color: white !important;
@@ -685,8 +690,8 @@ const LabReportCover = ({ data }) => {
         {`
           .preview-wrapper * { margin: 0; padding: 0; box-sizing: border-box; }
           .preview-wrapper { font-family: 'Times New Roman', Times, serif; }
-          .preview-wrapper .page { width: 210mm; min-height: 297mm; background: white; padding: 10mm; position: relative; }
-          .preview-wrapper .border-frame { border: 2px solid #1a1a50; height: 275mm; padding: 15px 30px; position: relative; display: flex; flex-direction: column; }
+          .preview-wrapper .page { width: 210mm; height: 297mm; min-height: 297mm; max-height: 297mm; background: white; padding: 10mm; position: relative; margin: 0 auto; overflow: hidden; page-break-after: avoid; }
+          .preview-wrapper .border-frame { border: 2px solid #1a1a50; height: 275mm; max-height: 275mm; padding: 15px 30px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
           .preview-wrapper .watermark { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 350px; opacity: 0.15; pointer-events: none; z-index: 0; }
           .preview-wrapper .content { z-index: 1; position: relative; display: flex; flex-direction: column; height: 100%; }
           .preview-wrapper .header { text-align: center; margin-bottom: 15px; }
@@ -714,10 +719,14 @@ const LabReportCover = ({ data }) => {
           @media print {
             .preview-wrapper .page { 
               width: 210mm; 
-              height: 297mm; 
-              margin: 0; 
-              padding: 10mm;
-              page-break-after: always;
+              height: 297mm !important; 
+              max-height: 297mm !important;
+              min-height: 297mm !important;
+              margin: 0 !important; 
+              padding: 10mm !important;
+              page-break-after: avoid !important;
+              page-break-before: avoid !important;
+              overflow: hidden !important;
             }
             .preview-wrapper .teacher-box {
               background-color: white !important;
@@ -809,6 +818,171 @@ const LabReportCover = ({ data }) => {
 };
 
 // ============================================
+// LAB INDEX COMPONENT
+// ============================================
+
+const LabIndex = ({ data }) => {
+  // Generate empty rows if no experiments or fill remaining rows
+  const minRows = 10; // Minimum rows for handwriting space
+  const experiments = data.experiments || [];
+  const emptyRowsNeeded = Math.max(0, minRows - experiments.length);
+  const emptyRows = Array(emptyRowsNeeded).fill(null);
+
+  return (
+    <div className="lab-index-wrapper">
+      <style>
+        {`
+          .lab-index-wrapper * { margin: 0; padding: 0; box-sizing: border-box; }
+          .lab-index-wrapper { font-family: 'Times New Roman', Times, serif; }
+          .lab-index-wrapper .page { width: 210mm; height: 297mm; min-height: 297mm; max-height: 297mm; background: white; padding: 10mm; position: relative; margin: 0 auto; overflow: hidden; page-break-after: avoid; }
+          .lab-index-wrapper .border-frame { border: 2px solid #1a1a50; height: 275mm; max-height: 275mm; padding: 15px 25px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+          .lab-index-wrapper .content { display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
+          .lab-index-wrapper .header { text-align: center; margin-bottom: 20px; }
+          .lab-index-wrapper .logo { width: 70px; height: auto; margin: 0 auto 10px auto; display: block; }
+          .lab-index-wrapper .varsity-name-img { max-width: 60%; height: auto; display: block; margin: 0 auto; }
+          .lab-index-wrapper .page-title { font-size: 22px; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-top: 15px; margin-bottom: 20px; text-align: center; text-decoration: underline; }
+          
+          /* Student and Course Info */
+          .lab-index-wrapper .info-section { display: flex; justify-content: space-between; margin-bottom: 20px; padding: 0 10px; }
+          .lab-index-wrapper .info-left, .lab-index-wrapper .info-right { flex: 1; }
+          .lab-index-wrapper .info-line { display: flex; margin-bottom: 8px; font-size: 15px; }
+          .lab-index-wrapper .info-label { font-weight: bold; width: 120px; flex-shrink: 0; }
+          .lab-index-wrapper .info-value { flex: 1; }
+          
+          /* Table Styles */
+          .lab-index-wrapper .table-container { margin-bottom: 15px; }
+          .lab-index-wrapper table { width: 100%; border-collapse: collapse; border: 2px solid black; }
+          .lab-index-wrapper th, .lab-index-wrapper td { border: 1px solid black; padding: 8px; text-align: center; }
+          .lab-index-wrapper th { font-weight: bold; background-color: #f5f5f5; font-size: 14px; }
+          .lab-index-wrapper td { font-size: 13px; min-height: 35px; }
+          .lab-index-wrapper .col-sl { width: 50px; }
+          .lab-index-wrapper .col-date { width: 85px; }
+          .lab-index-wrapper .col-experiment { width: auto; text-align: left; padding-left: 12px; }
+          .lab-index-wrapper .col-report { width: 70px; }
+          .lab-index-wrapper .col-viva { width: 70px; }
+          .lab-index-wrapper .col-performance { width: 90px; }
+          .lab-index-wrapper .col-signature { width: 90px; }
+          .lab-index-wrapper tbody tr { height: 40px; }
+          
+          /* Footer */
+          .lab-index-wrapper .footer { margin-top: 0; }
+          .lab-index-wrapper .campus-img { width: 100%; height: 100px; object-fit: cover; border-radius: 2px; display: block; }
+          
+          @media print {
+            .lab-index-wrapper .page { 
+              width: 210mm; 
+              height: 297mm !important; 
+              max-height: 297mm !important;
+              min-height: 297mm !important;
+              margin: 0 !important; 
+              padding: 10mm !important;
+              page-break-after: avoid !important;
+              page-break-before: avoid !important;
+              overflow: hidden !important;
+            }
+            .lab-index-wrapper th {
+              background-color: #f5f5f5 !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+          }
+        `}
+      </style>
+      <div className="page">
+        <div className="border-frame">
+          <div className="content">
+            {/* Header with Logo and University Name */}
+            <div className="header">
+              <img src={logoImg} alt="IIUC Logo" className="logo" />
+              <img src={varsityNameImg} alt="University Name" className="varsity-name-img" />
+            </div>
+            
+            {/* Page Title */}
+            <div className="page-title">LAB REPORT INDEX</div>
+            
+            {/* Student and Course Information */}
+            <div className="info-section">
+              <div className="info-left">
+                <div className="info-line">
+                  <span className="info-label">NAME</span>
+                  <span className="info-value">: {data.studentName || '[STUDENT_NAME]'}</span>
+                </div>
+                <div className="info-line">
+                  <span className="info-label">ID NO</span>
+                  <span className="info-value">: {data.studentId || '[STUDENT_ID]'}</span>
+                </div>
+                <div className="info-line">
+                  <span className="info-label">SECTION</span>
+                  <span className="info-value">: {data.section || '[SECTION]'}</span>
+                </div>
+              </div>
+              <div className="info-right">
+                <div className="info-line">
+                  <span className="info-label">COURSE TITLE</span>
+                  <span className="info-value">: {data.courseTitle || '[COURSE_TITLE]'}</span>
+                </div>
+                <div className="info-line">
+                  <span className="info-label">COURSE CODE</span>
+                  <span className="info-value">: {data.courseCode || '[COURSE_CODE]'}</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Lab Report Table */}
+            <div className="table-container">
+              <table>
+                <thead>
+                  <tr>
+                    <th className="col-sl">Sl. No</th>
+                    <th className="col-date">Date</th>
+                    <th className="col-experiment">Experiment Name</th>
+                    <th className="col-report">Report</th>
+                    <th className="col-viva">Viva</th>
+                    <th className="col-performance">Class Performance</th>
+                    <th className="col-signature">Signature</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* Render experiments from data */}
+                  {experiments.map((exp, index) => (
+                    <tr key={index}>
+                      <td className="col-sl">{exp.no || index + 1}</td>
+                      <td className="col-date">{exp.date || ''}</td>
+                      <td className="col-experiment">{exp.name || ''}</td>
+                      <td className="col-report"></td>
+                      <td className="col-viva"></td>
+                      <td className="col-performance"></td>
+                      <td className="col-signature"></td>
+                    </tr>
+                  ))}
+                  {/* Render empty rows for handwriting */}
+                  {emptyRows.map((_, index) => (
+                    <tr key={`empty-${index}`}>
+                      <td className="col-sl">{experiments.length + index + 1}</td>
+                      <td className="col-date"></td>
+                      <td className="col-experiment"></td>
+                      <td className="col-report"></td>
+                      <td className="col-viva"></td>
+                      <td className="col-performance"></td>
+                      <td className="col-signature"></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            
+            {/* Footer Image */}
+            <div className="footer">
+              <img src={footerImg} alt="Campus Image" className="campus-img" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ============================================
 // LIVE PREVIEW COMPONENT
 // ============================================
 
@@ -850,6 +1024,48 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
       });
   };
 
+  // Download JPG using html2canvas
+  const handleDownloadJPG = async () => {
+    const element = componentRef.current;
+    
+    if (!element) {
+      toast.error('Unable to generate JPG. Please try again.');
+      return;
+    }
+
+    toast.info('Generating JPG...');
+
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 2, // Higher scale for better quality
+        useCORS: true, // Helps with images
+        backgroundColor: "#ffffff" // Ensure white background
+      });
+
+      const imageData = canvas.toDataURL('image/jpeg', 1.0);
+      const link = document.createElement('a');
+
+      // Dynamic filename based on active tab
+      const filePrefix = activeTab === 'assignment' ? 'Assignment' : 
+                         activeTab === 'labReport' ? 'LabReport' : 
+                         'LabIndex';
+
+      if (typeof link.download === 'string') {
+        link.href = imageData;
+        link.download = `${filePrefix}_${data.studentId || 'Cover'}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('JPG downloaded successfully!');
+      } else {
+        window.open(imageData);
+      }
+    } catch (error) {
+      console.error('JPG generation error:', error);
+      toast.error('Failed to generate JPG. Please try again.');
+    }
+  };
+
   const getTabLabel = () => {
     switch (activeTab) {
       case 'assignment':
@@ -881,31 +1097,30 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
           <div style={{ transform: 'scale(0.60)', transformOrigin: 'top left', width: '167%' }}>
             {activeTab === 'assignment' && <AssignmentCover data={data} />}
             {activeTab === 'labReport' && <LabReportCover data={data} />}
-            {activeTab === 'labIndex' && (
-              <div className="flex items-center justify-center h-full p-8">
-                <div className="text-center">
-                  <p className="text-gray-500 mb-4">Lab Index preview coming soon...</p>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <pre className="text-xs text-gray-700 whitespace-pre-wrap break-words font-mono">
-                      {JSON.stringify(data, null, 2)}
-                    </pre>
-                  </div>
-                </div>
-              </div>
-            )}
+            {activeTab === 'labIndex' && <LabIndex data={data} />}
           </div>
         </div>
         
-        {/* Download Button - Direct PDF Download */}
+        {/* Download Buttons - PDF and JPG */}
         <div className="p-4 border-t-2 border-gray-200">
-          <button 
-            onClick={handleDownload}
-            className="w-full py-3 bg-gradient-to-r from-[#006A4E] to-[#00805d] text-white rounded-xl font-bold hover:shadow-lg hover:shadow-[#006A4E]/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={!data || Object.keys(data).length === 0}
-          >
-            <Download className="h-5 w-5" />
-            Download PDF
-          </button>
+          <div className="flex gap-4">
+            <button 
+              onClick={handleDownload}
+              className="flex-1 py-3 bg-gradient-to-r from-[#006A4E] to-[#00805d] text-white rounded-xl font-bold hover:shadow-lg hover:shadow-[#006A4E]/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!data || Object.keys(data).length === 0}
+            >
+              <Download className="h-5 w-5" />
+              Download PDF
+            </button>
+            <button 
+              onClick={handleDownloadJPG}
+              className="flex-1 py-3 bg-white text-[#006A4E] border-2 border-[#006A4E] rounded-xl font-bold hover:bg-[#006A4E]/5 hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!data || Object.keys(data).length === 0}
+            >
+              <Download className="h-5 w-5" />
+              Download JPG
+            </button>
+          </div>
         </div>
       </div>
 
@@ -914,12 +1129,7 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
         <div ref={componentRef}>
           {activeTab === 'assignment' && <AssignmentCover data={data} />}
           {activeTab === 'labReport' && <LabReportCover data={data} />}
-          {activeTab === 'labIndex' && (
-            <div style={{ padding: '20mm', fontFamily: 'Times New Roman' }}>
-              <h1>Lab Index - Coming Soon</h1>
-              <pre>{JSON.stringify(data, null, 2)}</pre>
-            </div>
-          )}
+          {activeTab === 'labIndex' && <LabIndex data={data} />}
         </div>
       </div>
     </div>

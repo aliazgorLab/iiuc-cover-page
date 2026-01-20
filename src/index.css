@@ -211,3 +211,26 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #005a42;
 }
+/* ============================================ */
+/* PRINT STYLES - PREVENT EXTRA BLANK PAGES */
+/* ============================================ */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 0; /* Critical: Removes browser default margins */
+  }
+
+  body, html {
+    height: 100%;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: hidden; /* Prevents scrollbars from printing */
+  }
+
+  /* Prevent page breaks */
+  * {
+    page-break-after: avoid !important;
+    page-break-before: avoid !important;
+    page-break-inside: avoid !important;
+  }
+}
