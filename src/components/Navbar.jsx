@@ -44,10 +44,6 @@ const Navbar = () => {
               <span className="text-xl font-bold text-[#006A4E]">
                 IIUC Cover Page
               </span>
-              <div className="flex items-center space-x-1">
-                <Sparkles className="h-3 w-3 text-[#F3CF45]" />
-                <span className="text-xs text-gray-500 font-medium">Pro Design</span>
-              </div>
             </div>
           </Link>
 

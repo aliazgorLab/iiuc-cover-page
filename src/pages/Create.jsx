@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react';
 import { FileText, Plus, Trash2, Download } from 'lucide-react';
+import { toast } from 'react-toastify';
 import html2pdf from 'html2pdf.js';
 import logoImg from '../Image/logo.png';
 import varsityNameImg from '../Image/varsitityName.png';
@@ -577,9 +578,9 @@ const AssignmentCover = ({ data }) => {
           .preview-wrapper .val { flex: 1; }
           .preview-wrapper .submitted-to { text-align: center; margin-bottom: 30px; }
           .preview-wrapper .section-label-center { font-weight: bold; text-decoration: underline; margin-bottom: 10px; font-size: 16px; text-align: center; }
-          .preview-wrapper .teacher-box { border: 1px solid black; display: inline-block; padding: 10px 40px; min-width: 300px; background: rgba(255, 255, 255, 0.8); }
-          .preview-wrapper .teacher-name { font-size: 18px; font-weight: bold; text-color: black; }
-          .preview-wrapper .teacher-desig { font-size: 14px; margin-top: 2px; }
+          .preview-wrapper .teacher-box { border: 1px solid black; display: inline-block; padding: 10px 40px; min-width: 300px; background: white; position: relative; z-index: 10; }
+          .preview-wrapper .teacher-name { font-size: 18px; font-weight: bold; color: black !important; position: relative; z-index: 20; }
+          .preview-wrapper .teacher-desig { font-size: 14px; margin-top: 2px; color: black !important; position: relative; z-index: 20; }
           .preview-wrapper .footer-details { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; margin-bottom: 15px; font-weight: bold; font-size: 14px; }
           .preview-wrapper .remark-box { border: 1px solid black; width: 200px; height: 60px; position: relative; }
           .preview-wrapper .remark-text { position: absolute; top: 5px; left: 5px; font-size: 12px; }
@@ -592,6 +593,15 @@ const AssignmentCover = ({ data }) => {
               margin: 0; 
               padding: 10mm;
               page-break-after: always;
+            }
+            .preview-wrapper .teacher-box {
+              background-color: white !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .preview-wrapper .teacher-name,
+            .preview-wrapper .teacher-desig {
+              z-index: 50 !important;
             }
           }
         `}
@@ -622,9 +632,9 @@ const AssignmentCover = ({ data }) => {
             <div className="submitted-to">
               <div className="section-label-center">SUBMITTED TO :</div>
               <div className="teacher-box">
-                <div className="teacher-name">{data.teacherName || '[TEACHER_NAME]'}</div>
-                <div className="teacher-desig">{data.teacherDesignation || '[TEACHER_DESIGNATION]'}</div>
-                <div className="teacher-desig">{data.teacherDept || '[TEACHER_DEPARTMENT]'}</div>
+                <div className="teacher-name">{data?.teacherName || 'Teacher Name'}</div>
+                <div className="teacher-desig">{data?.teacherDesignation || 'Designation'},</div>
+                <div className="teacher-desig">{data?.teacherDept || 'Department'}</div>
               </div>
             </div>
             <div className="submitted-by">
@@ -693,9 +703,9 @@ const LabReportCover = ({ data }) => {
           .preview-wrapper .val { flex: 1; }
           .preview-wrapper .submitted-to { text-align: center; margin-bottom: 30px; }
           .preview-wrapper .section-label-center { font-weight: bold; text-decoration: underline; margin-bottom: 10px; font-size: 16px; text-align: center; }
-          .preview-wrapper .teacher-box { border: 1px solid black; display: inline-block; padding: 10px 40px; min-width: 300px; background: rgba(255, 255, 255, 0.8); }
-          .preview-wrapper .teacher-name { font-size: 18px; font-weight: bold; }
-          .preview-wrapper .teacher-desig { font-size: 14px; margin-top: 2px; }
+          .preview-wrapper .teacher-box { border: 1px solid black; display: inline-block; padding: 10px 40px; min-width: 300px; background: white; position: relative; z-index: 10; }
+          .preview-wrapper .teacher-name { font-size: 18px; font-weight: bold; color: black !important; position: relative; z-index: 20; }
+          .preview-wrapper .teacher-desig { font-size: 14px; margin-top: 2px; color: black !important; position: relative; z-index: 20; }
           .preview-wrapper .footer-details { display: flex; justify-content: space-between; align-items: flex-end; margin-top: auto; margin-bottom: 15px; font-weight: bold; font-size: 14px; }
           .preview-wrapper .remark-box { border: 1px solid black; width: 200px; height: 60px; position: relative; }
           .preview-wrapper .remark-text { position: absolute; top: 5px; left: 5px; font-size: 12px; }
@@ -708,6 +718,15 @@ const LabReportCover = ({ data }) => {
               margin: 0; 
               padding: 10mm;
               page-break-after: always;
+            }
+            .preview-wrapper .teacher-box {
+              background-color: white !important;
+              -webkit-print-color-adjust: exact;
+              print-color-adjust: exact;
+            }
+            .preview-wrapper .teacher-name,
+            .preview-wrapper .teacher-desig {
+              z-index: 50 !important;
             }
           }
         `}
@@ -747,9 +766,9 @@ const LabReportCover = ({ data }) => {
             <div className="submitted-to">
               <div className="section-label-center">SUBMITTED TO :</div>
               <div className="teacher-box">
-                <div className="teacher-name">{data.teacherName || '[TEACHER_NAME]'}</div>
-                <div className="teacher-desig">{data.teacherDesignation || '[TEACHER_DESIGNATION]'}</div>
-                <div className="teacher-desig">{data.teacherDept || '[TEACHER_DEPARTMENT]'}</div>
+                <div className="teacher-name">{data?.teacherName || 'Teacher Name'}</div>
+                <div className="teacher-desig">{data?.teacherDesignation || 'Designation'},</div>
+                <div className="teacher-desig">{data?.teacherDept || 'Department'}</div>
               </div>
             </div>
             <div className="submitted-by">
@@ -802,9 +821,11 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
     const element = componentRef.current;
     
     if (!element) {
-      alert('Unable to generate PDF. Please try again.');
+      toast.error('Unable to generate PDF. Please try again.');
       return;
     }
+    
+    toast.info('Generating PDF...');
 
     // Dynamic filename based on active tab
     const filePrefix = activeTab === 'assignment' ? 'Assignment' : 
@@ -819,7 +840,14 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
       jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    html2pdf().set(options).from(element).save();
+    html2pdf().set(options).from(element).save()
+      .then(() => {
+        toast.success('PDF downloaded successfully!');
+      })
+      .catch((error) => {
+        console.error('PDF generation error:', error);
+        toast.error('Failed to generate PDF. Please try again.');
+      });
   };
 
   const getTabLabel = () => {

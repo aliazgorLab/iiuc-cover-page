@@ -171,7 +171,7 @@ const About = () => {
           <p className="text-gray-700 text-lg flex items-center justify-center gap-3 font-medium">
             Made with 
             <Heart className="h-6 w-6 text-red-500 fill-current animate-pulse" /> 
-            by IIUC students, for IIUC students
+            by Md Ali Azgor, for IIUC students
           </p>
           <p className="text-gray-500 text-sm mt-3">
             © 2026 IIUC Cover Page Generator. All rights reserved.
