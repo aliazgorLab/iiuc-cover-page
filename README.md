@@ -171,7 +171,7 @@ npm run preview
 ## 📁 Project Structure
 
 ```
-my-cover-page/
+iiuc-cover-page/
 ├── public/                      # Static assets
 ├── src/
 │   ├── assets/                  # Images, fonts, etc.
