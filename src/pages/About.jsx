@@ -145,7 +145,7 @@ const About = () => {
                 </div>
                 <div>
                   <div className="font-semibold text-sm text-white/80">Email Us</div>
-                  <div className="text-base">support@iiuc-coverpage.com</div>
+                  <div className="text-base">ali.azgor0810@gmail.com</div>
                 </div>
               </a>
               <a
@@ -169,9 +169,7 @@ const About = () => {
         {/* Footer Note */}
         <div className="text-center bento-card p-8">
           <p className="text-gray-700 text-lg flex items-center justify-center gap-3 font-medium">
-            Made with 
-            <Heart className="h-6 w-6 text-red-500 fill-current animate-pulse" /> 
-            by Md Ali Azgor, for IIUC students
+            Made by Md Ali Azgor, for IIUC students
           </p>
           <p className="text-gray-500 text-sm mt-3">
             © 2026 IIUC Cover Page Generator. All rights reserved.

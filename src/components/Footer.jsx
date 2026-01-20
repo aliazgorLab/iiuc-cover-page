@@ -69,7 +69,7 @@ const Footer = () => {
         {/* Copyright */}
         <div className="border-t border-[#F3CF45]/30 mt-8 pt-6 text-center">
           <p className="text-sm text-gray-200">
-            © {new Date().getFullYear()} IIUC Cover Page Generator. Made with ❤️ for IIUC Students.
+            © {new Date().getFullYear()} IIUC Cover Page Generator. Made for IIUC Students.
           </p>
         </div>
       </div>
