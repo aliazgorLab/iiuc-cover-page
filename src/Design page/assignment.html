@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IIUC Assignment Cover Page</title>
+    <style>
+        /* RESET & BASICS */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #f0f0f0;
+            font-family: 'Times New Roman', Times, serif;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* A4 PAGE SETUP */
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            padding: 10mm;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* BORDER FRAME */
+        .border-frame {
+            border: 2px solid #1a1a50;
+            height: 275mm;
+            padding: 15px 30px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* WATERMARK */
+        .watermark {
+            position: absolute;
+            top: 45%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 350px;
+            opacity: 0.15;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* CONTENT WRAPPER */
+        .content {
+            z-index: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* HEADER SECTION */
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .logo {
+            width: 70px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        .varsity-name-img {
+            max-width: 60%; 
+            height: auto;
+            display: block;
+            margin: 0 auto;
+        }
+
+        /* ASSIGNMENT TITLE */
+        .assignment-title {
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* --- ALIGNMENT LOGIC --- */
+        /* We use the same Width, Margin, and Padding logic for both boxes to ensure text aligns vertically */
+
+        /* COURSE INFO BOX */
+        .course-info-box {
+            padding: 15px 20px; /* Horizontal padding aligns with Submitted By */
+            margin-bottom: 25px;
+            width: 100%;
+            max-width: 550px; /* Fixed width to center properly */
+            margin-left: auto; 
+            margin-right: auto;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* SUBMITTED BY SECTION */
+        .submitted-by {
+            width: 100%;
+            max-width: 550px; /* MATCHES course-info-box width */
+            margin: 0 auto 20px auto; /* MATCHES course-info-box centering */
+            padding: 0 20px; /* MATCHES course-info-box padding */
+        }
+
+        .submitted-by .section-label {
+            text-align: left; /* Keep left aligned within the block */
+            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        /* ROW STYLES */
+        .info-row, .student-row {
+            display: flex;
+            margin-bottom: 8px;
+            font-size: 17px;
+            font-weight: bold;
+            align-items: flex-start;
+        }
+
+        .info-row:last-child { margin-bottom: 0; }
+        .student-row:last-child { margin-bottom: 0; }
+
+        /* FIXED LABEL WIDTH FOR COLON ALIGNMENT */
+        .label, .student-label {
+            width: 160px; /* Matches for both sections */
+            flex-shrink: 0;
+        }
+        
+        .val { flex: 1; }
+
+        /* SUBMITTED TO (Stays Center) */
+        .submitted-to {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .section-label-center {
+            font-weight: bold;
+            text-decoration: underline;
+            margin-bottom: 10px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .teacher-box {
+            border: 1px solid black;
+            display: inline-block;
+            padding: 10px 40px;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.8);
+        }
+
+        .teacher-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .teacher-desig {
+            font-size: 14px;
+            margin-top: 2px;
+        }
+
+        /* FOOTER DETAILS */
+        .footer-details {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-top: auto;
+            margin-bottom: 15px;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .remark-box {
+            border: 1px solid black;
+            width: 200px;
+            height: 60px;
+            position: relative;
+        }
+
+        .remark-text {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            font-size: 12px;
+        }
+
+        .campus-img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 2px;
+            display: block;
+        }
+
+        @media print {
+            body { background: none; padding: 0; }
+            .page { box-shadow: none; margin: 0; width: 210mm; height: 297mm; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="page">
+        <div class="border-frame">
+            <img src="../Image/logo.png" alt="Watermark" class="watermark">
+
+            <div class="content">
+                <div class="header">
+                    <img src="../Image/logo.png" alt="IIUC Logo" class="logo">
+                    <img src="../Image/varsitityName.png" alt="University Name" class="varsity-name-img">
+                </div>
+
+                <div class="assignment-title">ASSIGNMENT</div>
+
+                 <div class="course-info-box">
+                    <div class="info-row">
+                        <div class="label">COURSE CODE</div>
+                        <div class="val">: [COURSE_CODE]</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="label">COURSE TITLE</div>
+                        <div class="val">: [COURSE_TITLE]</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="label">TOPIC NAME</div>
+                        <div class="val">: [TOPIC_NAME]</div>
+                    </div>
+                </div>
+
+                <div class="submitted-to">
+                    <div class="section-label-center">SUBMITTED TO :</div>
+                    <div class="teacher-box">
+                        <div class="teacher-name">[TEACHER_NAME]</div>
+                        <div class="teacher-desig">[TEACHER_DESIGNATION]</div>
+                        <div class="teacher-desig">[TEACHER_DEPARTMENT]</div>
+                    </div>
+                </div>
+
+                <div class="submitted-by">
+                    <div class="section-label">SUBMITTED BY :</div>
+                    <div class="student-row">
+                        <div class="student-label">NAME</div>
+                        <div>: [STUDENT_NAME]</div>
+                    </div>
+                    <div class="student-row">
+                        <div class="student-label">ID NO</div>
+                        <div>: [STUDENT_ID]</div>
+                    </div>
+                    <div class="student-row">
+                        <div class="student-label">SEMESTER</div>
+                        <div>: [SEMESTER]</div>
+                    </div>
+                    <div class="student-row">
+                        <div class="student-label">SECTION</div>
+                        <div>: [SECTION]</div>
+                    </div>
+                    <div class="student-row">
+                        <div class="student-label">DEPARTMENT</div>
+                        <div>: [DEPARTMENT]</div>
+                    </div>
+                </div>
+
+                <div class="footer-details">
+                    <div class="date">DATE OF SUBMISSION : [SUBMISSION_DATE]</div>
+                    <div class="remark-box">
+                        <span class="remark-text">REMARK:</span>
+                    </div>
+                </div>
+
+                <img src="../Image/footer.png" alt="Campus Image" class="campus-img">
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
