@@ -990,8 +990,56 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
   // Create reference for the hidden full-size component
   const componentRef = useRef();
 
+  // Validation function to check required fields
+  const validateForm = () => {
+    // Common required fields for all tabs
+    if (!data.studentName || !data.studentId) {
+      toast.error('Please fill in Student Name and Student ID!');
+      return false;
+    }
+
+    // Tab-specific validation
+    if (activeTab === 'assignment') {
+      if (!data.courseCode || !data.courseTitle || !data.assignmentTitle) {
+        toast.error('Please fill in all required fields: Course Code, Course Title, and Assignment Title!');
+        return false;
+      }
+      if (!data.teacherName || !data.submissionDate) {
+        toast.error('Please fill in Teacher Name and Submission Date!');
+        return false;
+      }
+    } else if (activeTab === 'labReport') {
+      if (!data.courseCode || !data.courseTitle) {
+        toast.error('Please fill in Course Code and Course Title!');
+        return false;
+      }
+      if (!data.experimentNo || !data.experimentName) {
+        toast.error('Please fill in Experiment No and Experiment Name!');
+        return false;
+      }
+      if (!data.teacherName || !data.submissionDate) {
+        toast.error('Please fill in Teacher Name and Submission Date!');
+        return false;
+      }
+    } else if (activeTab === 'labIndex') {
+      if (!data.courseCode || !data.courseTitle) {
+        toast.error('Please fill in Course Code and Course Title!');
+        return false;
+      }
+      if (!data.section) {
+        toast.error('Please fill in Section!');
+        return false;
+      }
+    }
+
+    return true;
+  };
+
   // Download PDF directly using html2pdf.js
   const handleDownload = () => {
+    // Validate form before proceeding
+    if (!validateForm()) return;
+
     const element = componentRef.current;
     
     if (!element) {
@@ -1026,6 +1074,9 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
 
   // Download JPG using html2canvas
   const handleDownloadJPG = async () => {
+    // Validate form before proceeding
+    if (!validateForm()) return;
+
     const element = componentRef.current;
     
     if (!element) {
