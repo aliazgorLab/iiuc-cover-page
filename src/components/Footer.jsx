@@ -2,9 +2,9 @@ import footerImg from '../Image/footer.png';
 
 const Footer = () => {
   return (
-    <footer className="bg-[#006A4E] text-white mt-auto">
+    <footer className="w-full bg-[#006A4E] text-white mt-auto overflow-x-hidden">
       {/* Footer Image */}
-      <div className="w-full">
+      <div className="w-full overflow-hidden">
         <img 
           src={footerImg} 
           alt="IIUC Campus" 

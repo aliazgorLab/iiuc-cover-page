@@ -155,8 +155,8 @@ const Create = () => {
   };
 
   return (
-    <div className="min-h-screen py-8">
-      <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen py-8 w-full overflow-x-hidden">
+      <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-extrabold text-gray-900 mb-2">
@@ -185,10 +185,10 @@ const Create = () => {
           </div>
         </div>
 
-        {/* Main Content - Split Screen */}
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* LEFT COLUMN - Form */}
-          <div className="space-y-6">
+        {/* Main Content - Responsive Flex Layout */}
+        <div className="flex flex-col lg:flex-row gap-6 w-full max-w-7xl mx-auto">
+          {/* 1. INPUT FORM CONTAINER (First on mobile and desktop) */}
+          <div className="w-full lg:w-1/2 space-y-6 order-1">
             {activeTab === 'assignment' && <AssignmentForm data={assignmentData} updateData={updateAssignment} />}
             {activeTab === 'labReport' && <LabReportForm data={labReportData} updateData={updateLabReport} />}
             {activeTab === 'labIndex' && (
@@ -202,8 +202,8 @@ const Create = () => {
             )}
           </div>
 
-          {/* RIGHT COLUMN - Live Preview (Sticky) */}
-          <div className="lg:sticky lg:top-8 h-fit">
+          {/* 2. LIVE PREVIEW CONTAINER (Second on mobile, sticky on desktop) */}
+          <div className="w-full lg:w-1/2 order-2 lg:sticky lg:top-8 h-fit">
             <LivePreview 
               data={getCurrentData()} 
               activeTab={activeTab} 
@@ -458,7 +458,7 @@ const LabIndexForm = ({ data, updateData, updateExperiment, addExperiment, delet
               )}
 
               <div className="space-y-3">
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
                   <InputField
                     label="Exp. No."
                     value={exp.no}
@@ -481,7 +481,7 @@ const LabIndexForm = ({ data, updateData, updateExperiment, addExperiment, delet
                   placeholder="Enter experiment name"
                   small
                 />
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
                   <InputField
                     label="Page No."
                     value={exp.pageNo}
@@ -521,12 +521,12 @@ const LabIndexForm = ({ data, updateData, updateExperiment, addExperiment, delet
 
 const FormSection = ({ title, icon, children }) => {
   return (
-    <div className="bento-card p-6">
+    <div className="bento-card p-6 w-full">
       <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-gray-100">
         <span className="text-2xl">{icon}</span>
         <h3 className="text-lg font-bold text-gray-900">{title}</h3>
       </div>
-      <div className="space-y-4">
+      <div className="space-y-4 w-full">
         {children}
       </div>
     </div>
@@ -1131,24 +1131,29 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
   };
 
   return (
-    <div className="bento-card p-6">
-      <div className="flex items-center justify-between mb-6">
+    <div className="bento-card p-4 sm:p-6 w-full max-w-full">
+      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div className="flex items-center gap-3">
           <FileText className="h-6 w-6 text-[#006A4E]" />
-          <h3 className="text-xl font-bold text-gray-900">Live Preview</h3>
+          <h3 className="text-lg sm:text-xl font-bold text-gray-900">Live Preview</h3>
         </div>
-        <span className="px-3 py-1 bg-[#F3CF45]/20 text-[#004d38] rounded-lg text-sm font-semibold border border-[#F3CF45]/40">
+        <span className="px-3 py-1 bg-[#F3CF45]/20 text-[#004d38] rounded-lg text-xs sm:text-sm font-semibold border border-[#F3CF45]/40">
           {getTabLabel()}
         </span>
       </div>
 
-      {/* A4 Preview Container with Scaling (VISIBLE - Scaled down for viewing) */}
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-        <div className="overflow-auto" style={{ height: '850px' }}>
-          <div style={{ transform: 'scale(0.60)', transformOrigin: 'top left', width: '167%' }}>
-            {activeTab === 'assignment' && <AssignmentCover data={data} />}
-            {activeTab === 'labReport' && <LabReportCover data={data} />}
-            {activeTab === 'labIndex' && <LabIndex data={data} />}
+      {/* A4 Preview Container with Responsive Scaling */}
+      <div className="w-full max-w-[100vw] overflow-hidden">
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+          {/* Fixed height on mobile to match scaled content, auto on desktop */}
+          <div className="overflow-hidden flex justify-center h-[450px] sm:h-[550px] md:h-[650px] lg:h-[800px] xl:h-auto">
+            {/* Responsive scaling: Mobile 40%, Tablet 60%, Desktop 100% */}
+            <div className="transform origin-top transition-transform duration-300
+                            scale-[0.40] sm:scale-[0.55] md:scale-[0.70] lg:scale-[0.85] xl:scale-100">
+              {activeTab === 'assignment' && <AssignmentCover data={data} />}
+              {activeTab === 'labReport' && <LabReportCover data={data} />}
+              {activeTab === 'labIndex' && <LabIndex data={data} />}
+            </div>
           </div>
         </div>
         
