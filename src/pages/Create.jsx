@@ -561,9 +561,10 @@ const AssignmentCover = ({ data }) => {
         {`
           .preview-wrapper * { margin: 0; padding: 0; box-sizing: border-box; }
           .preview-wrapper { font-family: 'Times New Roman', Times, serif; }
-          .preview-wrapper .page { width: 210mm; height: 297mm; min-height: 297mm; max-height: 297mm; background: white; padding: 10mm; position: relative; margin: 0 auto; overflow: hidden; page-break-after: avoid; }
-          .preview-wrapper .border-frame { border: 2px solid #1a1a50; height: 275mm; max-height: 275mm; padding: 15px 30px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+          .preview-wrapper .page { width: 210mm; height: 296mm; min-height: 296mm; max-height: 296mm; background: white; padding: 10mm; position: relative; margin: 0 auto; overflow: hidden; page-break-after: avoid; margin-bottom: 0; }
+          .preview-wrapper .border-frame { border: 2px solid #1a1a50; height: 274mm; max-height: 274mm; padding: 15px 30px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
           .preview-wrapper .watermark { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 350px; opacity: 0.15; pointer-events: none; z-index: 0; }
+          .preview-wrapper .site-watermark { position: absolute; bottom: 8px; left: 0; width: 100%; text-align: center; color: #9ca3af; font-size: 10px; font-family: sans-serif; z-index: 100; }
           .preview-wrapper .content { z-index: 1; position: relative; display: flex; flex-direction: column; height: 100%; }
           .preview-wrapper .header { text-align: center; margin-bottom: 15px; }
           .preview-wrapper .logo { width: 70px; height: auto; margin: 0 auto 10px auto; display: block; }
@@ -590,9 +591,9 @@ const AssignmentCover = ({ data }) => {
           @media print {
             .preview-wrapper .page { 
               width: 210mm; 
-              height: 297mm !important; 
-              max-height: 297mm !important;
-              min-height: 297mm !important;
+              height: 296mm !important; 
+              max-height: 296mm !important;
+              min-height: 296mm !important;
               margin: 0 !important; 
               padding: 10mm !important;
               page-break-after: avoid !important;
@@ -674,6 +675,9 @@ const AssignmentCover = ({ data }) => {
             <img src={footerImg} alt="Campus Image" className="campus-img" />
           </div>
         </div>
+        <div className="site-watermark">
+          https://iiuccoverpage.vercel.app
+        </div>
       </div>
     </div>
   );
@@ -690,9 +694,10 @@ const LabReportCover = ({ data }) => {
         {`
           .preview-wrapper * { margin: 0; padding: 0; box-sizing: border-box; }
           .preview-wrapper { font-family: 'Times New Roman', Times, serif; }
-          .preview-wrapper .page { width: 210mm; height: 297mm; min-height: 297mm; max-height: 297mm; background: white; padding: 10mm; position: relative; margin: 0 auto; overflow: hidden; page-break-after: avoid; }
-          .preview-wrapper .border-frame { border: 2px solid #1a1a50; height: 275mm; max-height: 275mm; padding: 15px 30px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+          .preview-wrapper .page { width: 210mm; height: 296mm; min-height: 296mm; max-height: 296mm; background: white; padding: 10mm; position: relative; margin: 0 auto; overflow: hidden; page-break-after: avoid; margin-bottom: 0; }
+          .preview-wrapper .border-frame { border: 2px solid #1a1a50; height: 274mm; max-height: 274mm; padding: 15px 30px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
           .preview-wrapper .watermark { position: absolute; top: 45%; left: 50%; transform: translate(-50%, -50%); width: 350px; opacity: 0.15; pointer-events: none; z-index: 0; }
+          .preview-wrapper .site-watermark { position: absolute; bottom: 8px; left: 0; width: 100%; text-align: center; color: #9ca3af; font-size: 10px; font-family: sans-serif; z-index: 100; }
           .preview-wrapper .content { z-index: 1; position: relative; display: flex; flex-direction: column; height: 100%; }
           .preview-wrapper .header { text-align: center; margin-bottom: 15px; }
           .preview-wrapper .logo { width: 70px; height: auto; margin: 0 auto 10px auto; display: block; }
@@ -719,9 +724,9 @@ const LabReportCover = ({ data }) => {
           @media print {
             .preview-wrapper .page { 
               width: 210mm; 
-              height: 297mm !important; 
-              max-height: 297mm !important;
-              min-height: 297mm !important;
+              height: 296mm !important; 
+              max-height: 296mm !important;
+              min-height: 296mm !important;
               margin: 0 !important; 
               padding: 10mm !important;
               page-break-after: avoid !important;
@@ -812,6 +817,9 @@ const LabReportCover = ({ data }) => {
             <img src={footerImg} alt="Campus Image" className="campus-img" />
           </div>
         </div>
+        <div className="site-watermark">
+          https://iiuccoverpage.vercel.app
+        </div>
       </div>
     </div>
   );
@@ -834,8 +842,9 @@ const LabIndex = ({ data }) => {
         {`
           .lab-index-wrapper * { margin: 0; padding: 0; box-sizing: border-box; }
           .lab-index-wrapper { font-family: 'Times New Roman', Times, serif; }
-          .lab-index-wrapper .page { width: 210mm; height: 297mm; min-height: 297mm; max-height: 297mm; background: white; padding: 10mm; position: relative; margin: 0 auto; overflow: hidden; page-break-after: avoid; }
-          .lab-index-wrapper .border-frame { border: 2px solid #1a1a50; height: 275mm; max-height: 275mm; padding: 15px 25px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+          .lab-index-wrapper .page { width: 210mm; height: 296mm; min-height: 296mm; max-height: 296mm; background: white; padding: 10mm; position: relative; margin: 0 auto; overflow: hidden; page-break-after: avoid; margin-bottom: 0; }
+          .lab-index-wrapper .site-watermark { position: absolute; bottom: 8px; left: 0; width: 100%; text-align: center; color: #9ca3af; font-size: 10px; font-family: sans-serif; z-index: 100; }
+          .lab-index-wrapper .border-frame { border: 2px solid #1a1a50; height: 274mm; max-height: 274mm; padding: 15px 25px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
           .lab-index-wrapper .content { display: flex; flex-direction: column; height: 100%; justify-content: space-between; }
           .lab-index-wrapper .header { text-align: center; margin-bottom: 20px; }
           .lab-index-wrapper .logo { width: 70px; height: auto; margin: 0 auto 10px auto; display: block; }
@@ -871,9 +880,9 @@ const LabIndex = ({ data }) => {
           @media print {
             .lab-index-wrapper .page { 
               width: 210mm; 
-              height: 297mm !important; 
-              max-height: 297mm !important;
-              min-height: 297mm !important;
+              height: 296mm !important; 
+              max-height: 296mm !important;
+              min-height: 296mm !important;
               margin: 0 !important; 
               padding: 10mm !important;
               page-break-after: avoid !important;
@@ -976,6 +985,9 @@ const LabIndex = ({ data }) => {
               <img src={footerImg} alt="Campus Image" className="campus-img" />
             </div>
           </div>
+        </div>
+        <div className="site-watermark">
+          https://iiuccoverpage.vercel.app
         </div>
       </div>
     </div>
@@ -1144,16 +1156,11 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
 
       {/* A4 Preview Container with Responsive Scaling */}
       <div className="w-full max-w-[100vw] overflow-hidden">
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-          {/* Fixed height on mobile to match scaled content, auto on desktop */}
-          <div className="overflow-hidden flex justify-center h-[450px] sm:h-[550px] md:h-[650px] lg:h-[800px] xl:h-auto">
-            {/* Responsive scaling: Mobile 40%, Tablet 60%, Desktop 100% */}
-            <div className="transform origin-top transition-transform duration-300
-                            scale-[0.40] sm:scale-[0.55] md:scale-[0.70] lg:scale-[0.85] xl:scale-100">
-              {activeTab === 'assignment' && <AssignmentCover data={data} />}
-              {activeTab === 'labReport' && <LabReportCover data={data} />}
-              {activeTab === 'labIndex' && <LabIndex data={data} />}
-            </div>
+        <div className="w-full flex justify-center overflow-hidden h-[600px] lg:h-[800px] border rounded-lg bg-gray-100">
+          <div className="transform scale-[0.45] sm:scale-[0.55] lg:scale-[0.65] origin-top mt-4">
+            {activeTab === 'assignment' && <AssignmentCover data={data} />}
+            {activeTab === 'labReport' && <LabReportCover data={data} />}
+            {activeTab === 'labIndex' && <LabIndex data={data} />}
           </div>
         </div>
         
