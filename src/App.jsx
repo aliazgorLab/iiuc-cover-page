@@ -32,6 +32,7 @@ function App() {
         pauseOnHover
         theme="light"
       />
+      <Analytics />
     </BrowserRouter>
   );
 }
