@@ -6,10 +6,11 @@ import html2canvas from 'html2canvas';
 import logoImg from '../Image/logo.png';
 import varsityNameImg from '../Image/varsitityName.png';
 import footerImg from '../Image/footer.png';
+import ProjectCover from '../components/covers/ProjectCover';
 
 const Create = () => {
   // Tab State
-  const [activeTab, setActiveTab] = useState('assignment'); // assignment, labReport, labIndex
+  const [activeTab, setActiveTab] = useState('assignment'); // assignment, labReport, labIndex, project
 
   // Form States for Each Type
   const [assignmentData, setAssignmentData] = useState({
@@ -54,6 +55,24 @@ const Create = () => {
     ]
   });
 
+  const [projectData, setProjectData] = useState({
+    projectTitle: '',
+    courseCode: '',
+    courseTitle: '',
+    teacherName: '',
+    teacherDesignation: '',
+    teacherDept: '',
+    date: '',
+    departmentName: '',
+  });
+
+  const [groupMembers, setGroupMembers] = useState([
+    { name: '', id: '' }
+  ]);
+
+  // Error state for validation
+  const [error, setError] = useState('');
+
   // Get current form data based on active tab
   const getCurrentData = () => {
     switch (activeTab) {
@@ -63,6 +82,8 @@ const Create = () => {
         return labReportData;
       case 'labIndex':
         return labIndexData;
+      case 'project':
+        return { ...projectData, groupMembers };
       default:
         return {};
     }
@@ -104,10 +125,35 @@ const Create = () => {
     }));
   };
 
+  const updateProject = (field, value) => {
+    setProjectData(prev => ({ ...prev, [field]: value }));
+  };
+
+  const handleMemberChange = (index, field, value) => {
+    setGroupMembers(prev => 
+      prev.map((member, i) => 
+        i === index ? { ...member, [field]: value } : member
+      )
+    );
+  };
+
+  const addMember = () => {
+    if (groupMembers.length < 4) {
+      setGroupMembers(prev => [...prev, { name: '', id: '' }]);
+    }
+  };
+
+  const removeMember = (index) => {
+    if (groupMembers.length > 1) {
+      setGroupMembers(prev => prev.filter((_, i) => i !== index));
+    }
+  };
+
   const tabs = [
     { id: 'assignment', label: 'Assignment Cover', icon: '📝' },
     { id: 'labReport', label: 'Lab Report Cover', icon: '🔬' },
     { id: 'labIndex', label: 'Lab Index', icon: '📋' },
+    { id: 'project', label: 'Project Report', icon: '👥' },
   ];
 
   // Ref for PDF download
@@ -155,7 +201,7 @@ const Create = () => {
   };
 
   return (
-    <div className="min-h-screen py-8 w-full overflow-x-hidden">
+    <div className="min-h-screen pt-32 py-8 w-full overflow-x-hidden">
       <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-8">
@@ -200,6 +246,16 @@ const Create = () => {
                 deleteExperiment={deleteExperiment}
               />
             )}
+            {activeTab === 'project' && (
+              <ProjectForm 
+                data={projectData}
+                updateData={updateProject}
+                groupMembers={groupMembers}
+                handleMemberChange={handleMemberChange}
+                addMember={addMember}
+                removeMember={removeMember}
+              />
+            )}
           </div>
 
           {/* 2. LIVE PREVIEW CONTAINER (Second on mobile, sticky on desktop) */}
@@ -209,6 +265,8 @@ const Create = () => {
               activeTab={activeTab} 
               previewRef={previewRef}
               onDownload={handleDownloadPDF}
+              error={error}
+              setError={setError}
             />
           </div>
         </div>
@@ -244,7 +302,7 @@ const PersonDetailsForm = ({ data, updateData, titleTeacher = "Teacher Details",
             label="Department"
             value={data.teacherDept}
             onChange={(e) => updateData('teacherDept', e.target.value)}
-            placeholder="Computer Science"
+            placeholder="Dept. of CSE, IIUC"
           />
         </div>
       </FormSection>
@@ -276,7 +334,7 @@ const PersonDetailsForm = ({ data, updateData, titleTeacher = "Teacher Details",
             label="Semester"
             value={data.semester}
             onChange={(e) => updateData('semester', e.target.value)}
-            placeholder="Spring 2026"
+            placeholder="8th"
           />
           <InputField
             label="Department"
@@ -510,6 +568,134 @@ const LabIndexForm = ({ data, updateData, updateExperiment, addExperiment, delet
             Add Experiment
           </button>
         </div>
+      </FormSection>
+    </div>
+  );
+};
+
+const ProjectForm = ({ data, updateData, groupMembers, handleMemberChange, addMember, removeMember }) => {
+  return (
+    <div className="space-y-6">
+      {/* Project Details */}
+      <FormSection title="Project Details" icon="📝">
+        <InputField
+          label="Project Title"
+          value={data.projectTitle}
+          onChange={(e) => updateData('projectTitle', e.target.value)}
+          placeholder="Enter project title"
+        />
+      </FormSection>
+
+      {/* Course Details */}
+      <FormSection title="Course Details" icon="📚">
+        <div className="grid md:grid-cols-2 gap-4">
+          <InputField
+            label="Course Code"
+            value={data.courseCode}
+            onChange={(e) => updateData('courseCode', e.target.value)}
+            placeholder="CSE-401"
+          />
+          <InputField
+            label="Course Title"
+            value={data.courseTitle}
+            onChange={(e) => updateData('courseTitle', e.target.value)}
+            placeholder="Software Engineering"
+          />
+        </div>
+      </FormSection>
+
+      {/* Teacher Details */}
+      <FormSection title="Teacher Details" icon="👨‍🏫">
+        <InputField
+          label="Teacher Name"
+          value={data.teacherName}
+          onChange={(e) => updateData('teacherName', e.target.value)}
+          placeholder="Dr. John Doe"
+        />
+        <div className="grid md:grid-cols-2 gap-4">
+          <InputField
+            label="Designation"
+            value={data.teacherDesignation}
+            onChange={(e) => updateData('teacherDesignation', e.target.value)}
+            placeholder="Professor"
+          />
+          <InputField
+            label="Department"
+            value={data.teacherDept}
+            onChange={(e) => updateData('teacherDept', e.target.value)}
+            placeholder="Dept. of CSE, IIUC"
+          />
+        </div>
+      </FormSection>
+
+      {/* Group Members Section */}
+      <FormSection title="Group Members" icon="👥">
+        <div className="space-y-4">
+          {groupMembers.map((member, index) => (
+            <div key={index} className="bento-card p-4 relative">
+              {/* Delete Button */}
+              {groupMembers.length > 1 && (
+                <button
+                  onClick={() => removeMember(index)}
+                  className="absolute top-2 right-2 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                  title="Remove member"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              )}
+
+              <div className="space-y-3">
+                <div className="text-sm font-semibold text-gray-600 mb-2">
+                  Member {index + 1}
+                </div>
+                <InputField
+                  label="Name"
+                  value={member.name}
+                  onChange={(e) => handleMemberChange(index, 'name', e.target.value)}
+                  placeholder="Student Full Name"
+                  small
+                />
+                <InputField
+                  label="ID"
+                  value={member.id}
+                  onChange={(e) => handleMemberChange(index, 'id', e.target.value)}
+                  placeholder="C123456"
+                  small
+                />
+              </div>
+            </div>
+          ))}
+
+          {/* Add Member Button */}
+          <button
+            onClick={addMember}
+            disabled={groupMembers.length >= 4}
+            className="w-full py-3 border-2 border-dashed border-[#006A4E] text-[#006A4E] rounded-xl hover:bg-[#006A4E]/5 transition-all flex items-center justify-center gap-2 font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Plus className="h-5 w-5" />
+            Add Member {groupMembers.length >= 4 && '(Max 4)'}
+          </button>
+        </div>
+      </FormSection>
+
+      {/* Department Information */}
+      <FormSection title="Department Information" icon="🏛️">
+        <InputField
+          label="Department Name"
+          value={data.departmentName}
+          onChange={(e) => updateData('departmentName', e.target.value)}
+          placeholder="Department of Computer Science and Engineering"
+        />
+      </FormSection>
+
+      {/* Submission Details */}
+      <FormSection title="Submission Details" icon="📅">
+        <InputField
+          label="Date of Submission"
+          type="date"
+          value={data.date}
+          onChange={(e) => updateData('date', e.target.value)}
+        />
       </FormSection>
     </div>
   );
@@ -998,48 +1184,78 @@ const LabIndex = ({ data }) => {
 // LIVE PREVIEW COMPONENT
 // ============================================
 
-const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
+const LivePreview = ({ data, activeTab, previewRef, onDownload, error, setError }) => {
   // Create reference for the hidden full-size component
   const componentRef = useRef();
 
   // Validation function to check required fields
   const validateForm = () => {
-    // Common required fields for all tabs
+    // Clear any previous error
+    setError('');
+
+    // For project tab, validate group members and department
+    if (activeTab === 'project') {
+      if (!data.courseCode || !data.courseTitle || !data.projectTitle) {
+        setError('Please fill in all required fields: Course Code, Course Title, and Project Title!');
+        return false;
+      }
+      if (!data.teacherName || !data.date) {
+        setError('Please fill in Teacher Name and Date of Submission!');
+        return false;
+      }
+      if (!data.departmentName) {
+        setError('Please fill in Department Name!');
+        return false;
+      }
+      if (!data.groupMembers || data.groupMembers.length === 0) {
+        setError('Please add at least one group member!');
+        return false;
+      }
+      // Check if at least one member has both name and ID filled
+      const hasValidMember = data.groupMembers.some(member => member.name && member.id);
+      if (!hasValidMember) {
+        setError('Please fill in Name and ID for at least one group member!');
+        return false;
+      }
+      return true;
+    }
+
+    // Common required fields for all other tabs
     if (!data.studentName || !data.studentId) {
-      toast.error('Please fill in Student Name and Student ID!');
+      setError('Please fill in Student Name and Student ID!');
       return false;
     }
 
     // Tab-specific validation
     if (activeTab === 'assignment') {
       if (!data.courseCode || !data.courseTitle || !data.assignmentTitle) {
-        toast.error('Please fill in all required fields: Course Code, Course Title, and Assignment Title!');
+        setError('Please fill in all required fields: Course Code, Course Title, and Assignment Title!');
         return false;
       }
       if (!data.teacherName || !data.submissionDate) {
-        toast.error('Please fill in Teacher Name and Submission Date!');
+        setError('Please fill in Teacher Name and Submission Date!');
         return false;
       }
     } else if (activeTab === 'labReport') {
       if (!data.courseCode || !data.courseTitle) {
-        toast.error('Please fill in Course Code and Course Title!');
+        setError('Please fill in Course Code and Course Title!');
         return false;
       }
       if (!data.experimentNo || !data.experimentName) {
-        toast.error('Please fill in Experiment No and Experiment Name!');
+        setError('Please fill in Experiment No and Experiment Name!');
         return false;
       }
       if (!data.teacherName || !data.submissionDate) {
-        toast.error('Please fill in Teacher Name and Submission Date!');
+        setError('Please fill in Teacher Name and Submission Date!');
         return false;
       }
     } else if (activeTab === 'labIndex') {
       if (!data.courseCode || !data.courseTitle) {
-        toast.error('Please fill in Course Code and Course Title!');
+        setError('Please fill in Course Code and Course Title!');
         return false;
       }
       if (!data.section) {
-        toast.error('Please fill in Section!');
+        setError('Please fill in Section!');
         return false;
       }
     }
@@ -1064,6 +1280,7 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
     // Dynamic filename based on active tab
     const filePrefix = activeTab === 'assignment' ? 'Assignment' : 
                        activeTab === 'labReport' ? 'LabReport' : 
+                       activeTab === 'project' ? 'ProjectReport' :
                        'LabIndex';
 
     const options = {
@@ -1111,6 +1328,7 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
       // Dynamic filename based on active tab
       const filePrefix = activeTab === 'assignment' ? 'Assignment' : 
                          activeTab === 'labReport' ? 'LabReport' : 
+                         activeTab === 'project' ? 'ProjectReport' :
                          'LabIndex';
 
       if (typeof link.download === 'string') {
@@ -1137,6 +1355,8 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
         return 'Lab Report Cover';
       case 'labIndex':
         return 'Lab Index';
+      case 'project':
+        return 'Project Report';
       default:
         return 'Preview';
     }
@@ -1161,11 +1381,17 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
             {activeTab === 'assignment' && <AssignmentCover data={data} />}
             {activeTab === 'labReport' && <LabReportCover data={data} />}
             {activeTab === 'labIndex' && <LabIndex data={data} />}
+            {activeTab === 'project' && <ProjectCover {...data} />}
           </div>
         </div>
         
         {/* Download Buttons - PDF and JPG */}
         <div className="p-4 border-t-2 border-gray-200">
+          {error && (
+            <div className="text-red-500 text-sm font-bold mb-2 text-center animate-pulse">
+              {error}
+            </div>
+          )}
           <div className="flex gap-4">
             <button 
               onClick={handleDownload}
@@ -1193,6 +1419,7 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload }) => {
           {activeTab === 'assignment' && <AssignmentCover data={data} />}
           {activeTab === 'labReport' && <LabReportCover data={data} />}
           {activeTab === 'labIndex' && <LabIndex data={data} />}
+          {activeTab === 'project' && <ProjectCover {...data} />}
         </div>
       </div>
     </div>

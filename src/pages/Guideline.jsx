@@ -1,123 +1,128 @@
-import { BookOpen, CheckCircle, AlertCircle } from 'lucide-react';
+import { FileText, Edit, Download, Lightbulb, ArrowRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 
 const Guideline = () => {
-  const guidelines = [
+  const steps = [
     {
-      title: 'Fill All Required Fields',
-      description: 'Make sure to provide all necessary information including your name, student ID, course details, and submission date.',
+      number: 1,
+      icon: FileText,
+      title: 'Choose Your Template',
+      description: 'Go to the Create page and select "Assignment", "Lab Report", "Lab Index", or "Project" from the sidebar tabs.',
+      color: 'from-blue-500 to-blue-600',
+    },
+    {
+      number: 2,
+      icon: Edit,
+      title: 'Enter Your Details',
+      description: 'Fill in your Course Code, Title, and Teacher\'s name. The layout adjusts automatically as you type.',
+      color: 'from-purple-500 to-purple-600',
+    },
+    {
+      number: 3,
+      icon: Download,
+      title: 'Download PDF',
+      description: 'Click Download PDF for printing or Download JPG to share online. It\'s that easy!',
+      color: 'from-green-500 to-green-600',
+    },
+  ];
+
+  const proTips = [
+    {
+      icon: '👥',
+      text: 'Use the "Project" tab to add multiple group members (up to 4)!',
+    },
+    {
       icon: '📝',
+      text: 'Leave the Department field empty to see the placeholder preview.',
     },
     {
-      title: 'Use Official Email',
-      description: 'Always use your IIUC email address (@iiuc.ac.bd) for formal lab reports and submissions.',
-      icon: '📧',
+      icon: '🎯',
+      text: 'The live preview updates instantly as you type - no need to click anything!',
     },
     {
-      title: 'Follow Naming Convention',
-      description: 'Save your PDF with a clear naming format: CourseCode_StudentID_LabNumber.pdf',
-      icon: '📂',
-    },
-    {
-      title: 'Check Information Carefully',
-      description: 'Double-check all entered information before generating the PDF to avoid errors.',
-      icon: '✅',
-    },
-    {
-      title: 'Maintain Academic Integrity',
-      description: 'Only use this tool for your own work. Do not share or duplicate cover pages for others.',
-      icon: '🎓',
-    },
-    {
-      title: 'Keep PDF Quality',
-      description: 'Always download in high quality. Do not compress or reduce the resolution of the generated PDF.',
-      icon: '⭐',
+      icon: '💾',
+      text: 'Both PDF and JPG formats maintain professional quality for submission.',
     },
   ];
 
   return (
-    <div className="min-h-screen py-16">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="text-center mb-16 animate-fadeInUp">
-          <div className="relative inline-block mb-6">
-            <div className="absolute inset-0 bg-[#006A4E] rounded-3xl blur-xl opacity-30"></div>
-            <div className="relative p-5 bg-gradient-to-br from-[#006A4E] to-[#00805d] rounded-3xl">
-              <BookOpen className="h-16 w-16 text-white" />
-            </div>
-          </div>
-          <h1 className="text-5xl font-extrabold text-gray-900 mb-6">
-            Usage
-            <span className="text-[#006A4E]"> Guidelines</span>
+    <div className="min-h-screen pt-32 py-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header Section */}
+        <div className="text-center mb-20 animate-fadeInUp">
+          <h1 className="text-5xl md:text-6xl font-extrabold text-gray-900 mb-6">
+            How to Generate Your
+            <span className="text-[#006A4E]"> Cover Page</span>
           </h1>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Follow these best practices to create professional and compliant cover pages
+          <p className="text-xl md:text-2xl text-gray-600 max-w-3xl mx-auto">
+            Follow these 3 simple steps to create a professional cover page in seconds.
           </p>
         </div>
 
-        {/* Guidelines List */}
+        {/* Steps Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-20">
+          {steps.map((step, index) => (
+            <div 
+              key={index}
+              className="group relative bg-green-50 rounded-3xl p-8 hover:shadow-2xl transition-all duration-300 hover:-translate-y-2 border-2 border-transparent hover:border-[#006A4E]/30"
+            >
+              {/* Step Number Badge */}
+              <div className="absolute -top-4 -right-4 w-12 h-12 bg-[#006A4E] rounded-full flex items-center justify-center text-white text-xl font-bold shadow-lg group-hover:scale-110 transition-transform">
+                {step.number}
+              </div>
+
+              {/* Icon */}
+              <div className={`inline-flex p-4 rounded-2xl bg-gradient-to-br ${step.color} mb-6 group-hover:scale-110 transition-transform shadow-lg`}>
+                <step.icon className="h-10 w-10 text-white" />
+              </div>
+
+              {/* Content */}
+              <h3 className="text-2xl font-bold text-gray-900 mb-4 group-hover:text-[#006A4E] transition-colors">
+                {step.title}
+              </h3>
+              <p className="text-gray-600 leading-relaxed">
+                {step.description}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* Pro Tips Section */}
         <div className="bento-card p-8 md:p-12 mb-12">
-          <div className="space-y-8">
-            {guidelines.map((guideline, index) => (
+          <div className="flex items-center gap-3 mb-8">
+            <div className="p-3 bg-gradient-to-br from-[#F3CF45] to-[#e6c43d] rounded-xl">
+              <Lightbulb className="h-8 w-8 text-gray-900" />
+            </div>
+            <h2 className="text-3xl font-bold text-gray-900">Pro Tips</h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {proTips.map((tip, index) => (
               <div 
-                key={index} 
-                className="group flex gap-5 p-6 rounded-2xl hover:bg-[#006A4E]/5 transition-all duration-300 border-2 border-transparent hover:border-[#006A4E]/20"
+                key={index}
+                className="flex items-start gap-4 p-5 rounded-xl hover:bg-[#006A4E]/5 transition-all duration-300 border-2 border-transparent hover:border-[#006A4E]/20"
               >
-                <div className="shrink-0">
-                  <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#006A4E] to-[#00805d] flex items-center justify-center text-2xl group-hover:scale-110 transition-transform shadow-lg">
-                    {guideline.icon}
-                  </div>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-start justify-between">
-                    <h3 className="text-xl font-bold text-gray-900 mb-2 group-hover:text-[#006A4E] transition-colors">
-                      {guideline.title}
-                    </h3>
-                    <CheckCircle className="h-6 w-6 text-[#F3CF45] opacity-0 group-hover:opacity-100 transition-opacity" />
-                  </div>
-                  <p className="text-gray-600 leading-relaxed">
-                    {guideline.description}
-                  </p>
-                </div>
+                <span className="text-3xl shrink-0">{tip.icon}</span>
+                <p className="text-gray-700 leading-relaxed pt-1">
+                  {tip.text}
+                </p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Additional Information Cards */}
-        <div className="grid md:grid-cols-2 gap-6">
-          {/* Help Card */}
-          <div className="bg-gradient-to-br from-[#006A4E] to-[#00805d] rounded-2xl p-8 text-white shadow-xl">
-            <div className="flex items-center space-x-3 mb-4">
-              <AlertCircle className="h-8 w-8" />
-              <h3 className="text-2xl font-bold">Need Help?</h3>
-            </div>
-            <p className="text-white/90 mb-6 leading-relaxed">
-              If you encounter any issues or have questions about using this tool,
-              please refer to the About page for contact information or visit the
-              IIUC computer lab for assistance.
-            </p>
-            <div className="flex items-center space-x-2 text-[#F3CF45] text-sm font-semibold">
-              <span>💡</span>
-              <span>We're here to help you succeed!</span>
-            </div>
-          </div>
-
-          {/* Reminder Card */}
-          <div className="bento-card p-8">
-            <div className="flex items-center space-x-3 mb-4">
-              <span className="text-4xl">📋</span>
-              <h3 className="text-2xl font-bold text-gray-900">Quick Reminder</h3>
-            </div>
-            <p className="text-gray-600 mb-6 leading-relaxed">
-              This tool is designed to help you create professional cover
-              pages quickly and easily. Always follow your instructor's specific
-              requirements for lab report formatting.
-            </p>
-            <div className="flex items-center space-x-2 text-[#006A4E] text-sm font-semibold">
-              <span>✨</span>
-              <span>Quality matters - Double check everything!</span>
-            </div>
-          </div>
+        {/* Call to Action */}
+        <div className="text-center">
+          <Link 
+            to="/create"
+            className="inline-flex items-center gap-3 bg-gradient-to-r from-[#006A4E] to-[#00805d] text-white px-10 py-5 rounded-2xl text-xl font-bold hover:shadow-2xl hover:scale-105 transition-all duration-300 group"
+          >
+            <span>Start Creating Now</span>
+            <ArrowRight className="h-6 w-6 group-hover:translate-x-2 transition-transform" />
+          </Link>
+          <p className="mt-6 text-gray-500">
+            No signup required • Instant download • Completely free
+          </p>
         </div>
       </div>
     </div>

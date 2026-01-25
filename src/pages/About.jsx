@@ -1,8 +1,9 @@
 import { Info, Github, Mail, Heart, Users, Target, Zap } from 'lucide-react';
+import { FaLinkedin, FaFacebook, FaInstagram } from 'react-icons/fa';
 
 const About = () => {
   return (
-    <div className="min-h-screen py-16">
+    <div className="min-h-screen pt-32 py-16 bg-gradient-to-br from-gray-50 via-green-50/30 to-gray-50">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16 animate-fadeInUp">
@@ -166,14 +167,67 @@ const About = () => {
           </div>
         </div>
 
-        {/* Footer Note */}
-        <div className="text-center bento-card p-8">
-          <p className="text-gray-700 text-lg flex items-center justify-center gap-3 font-medium">
-            Made by Md Ali Azgor, for IIUC students
-          </p>
-          <p className="text-gray-500 text-sm mt-3">
-            © 2026 IIUC Cover Page Generator. All rights reserved.
-          </p>
+        {/* Developer Profile Card */}
+        <div className="flex justify-center">
+          <div className="bg-white rounded-2xl shadow-xl max-w-3xl w-full p-10 text-center border border-gray-100">
+            {/* Header */}
+            <p className="text-xs uppercase tracking-widest text-gray-500 font-semibold mb-3">
+              About the Developer
+            </p>
+            
+            {/* Main Title */}
+            <h2 className="text-3xl font-bold text-gray-900 mb-3">
+              Md Ali Azgor
+            </h2>
+            
+            {/* Role/Description */}
+            <p className="text-base text-gray-500 mb-8">
+              a CSE undergraduate student at International Islamic University Chittagong
+            </p>
+            
+            {/* Divider */}
+            <hr className="border-gray-200 mb-8" />
+            
+            {/* Social Section */}
+            <p className="text-base font-semibold text-gray-700 mb-6">
+              Connect with me:
+            </p>
+            
+            <div className="flex justify-center items-center gap-6 mb-8">
+              <a
+                href="https://www.linkedin.com/in/ali-azgor/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group p-4 rounded-2xl bg-gray-50 hover:bg-[#0077B5] transition-all duration-300 hover:scale-110 hover:shadow-xl"
+                aria-label="LinkedIn"
+              >
+                <FaLinkedin className="text-3xl text-gray-600 group-hover:text-white transition-colors" />
+              </a>
+              <a
+                href="https://www.facebook.com/ali.azgor.92317/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group p-4 rounded-2xl bg-gray-50 hover:bg-[#1877F2] transition-all duration-300 hover:scale-110 hover:shadow-xl"
+                aria-label="Facebook"
+              >
+                <FaFacebook className="text-3xl text-gray-600 group-hover:text-white transition-colors" />
+              </a>
+              <a
+                href="https://www.instagram.com/aliazgor_/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="group p-4 rounded-2xl bg-gray-50 hover:bg-gradient-to-br hover:from-[#F58529] hover:via-[#DD2A7B] hover:to-[#8134AF] transition-all duration-300 hover:scale-110 hover:shadow-xl"
+                aria-label="Instagram"
+              >
+                <FaInstagram className="text-3xl text-gray-600 group-hover:text-white transition-colors" />
+              </a>
+            </div>
+            
+            {/* Footer */}
+            <p className="text-sm text-gray-500">
+              © 2026 IIUC Cover Page Generator. All rights reserved.
+            </p>
+          </div>
         </div>
       </div>
     </div>

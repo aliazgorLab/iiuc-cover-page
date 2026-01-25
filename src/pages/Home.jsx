@@ -1,37 +1,42 @@
 import { Link } from 'react-router-dom';
 import { FileText, BookOpen, Users, Sparkles, Zap, Award, Clock } from 'lucide-react';
+import heroImg from '../Image/hero.png';
 
 const Home = () => {
   return (
     <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative bg-gradient-to-br from-[#006A4E] via-[#00805d] to-[#004d38] text-white overflow-hidden">
-        {/* Animated Background */}
-        <div className="absolute inset-0 opacity-10">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-[#F3CF45] rounded-full blur-3xl animate-float"></div>
-          <div className="absolute bottom-10 right-10 w-96 h-96 bg-white rounded-full blur-3xl animate-float" style={{animationDelay: '1s'}}></div>
-        </div>
+      <section 
+        className="relative w-full min-h-[90vh] flex flex-col justify-center items-center text-center overflow-hidden"
+        style={{ 
+          backgroundImage: `url(${heroImg})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
+        {/* Dark Overlay to make text readable */}
+        <div className="absolute inset-0 bg-black/60"></div>
         
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-40">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-40">
           <div className="text-center space-y-8">
             {/* Icon with Glow Effect */}
             <div className="inline-block relative animate-fadeInUp">
               <div className="absolute inset-0 bg-[#F3CF45] blur-2xl opacity-50 rounded-3xl"></div>
               <div className="relative p-5 glass-dark rounded-3xl shadow-2xl">
-                <FileText className="h-20 w-20 animate-float" />
+                <FileText className="h-20 w-20 text-white animate-float" />
               </div>
             </div>
             
             {/* Main Heading */}
             <div className="space-y-4 animate-fadeInUp" style={{animationDelay: '0.2s'}}>
-              <h1 className="text-5xl md:text-7xl font-extrabold leading-tight">
+              <h1 className="text-5xl md:text-7xl font-extrabold leading-tight text-white">
                 <span className="block">IIUC Cover Page</span>
                 <span className="block text-[#F3CF45] animate-shimmer">
                   Generator
                 </span>
               </h1>
               
-              <p className="text-xl md:text-2xl text-white/95 max-w-3xl mx-auto leading-relaxed font-medium">
+              <p className="text-xl md:text-2xl text-white max-w-3xl mx-auto leading-relaxed font-medium">
                 Create stunning, professional cover pages in seconds. 
                 <span className="block mt-2 text-[#F3CF45] font-bold">✨ Designed for Excellence ✨</span>
               </p>
@@ -62,15 +67,15 @@ const Home = () => {
             <div className="flex flex-wrap justify-center gap-8 pt-12 animate-fadeInUp" style={{animationDelay: '0.6s'}}>
               <div className="text-center">
                 <div className="text-4xl font-bold text-[#F3CF45]">1000+</div>
-                <div className="text-white/80 text-sm mt-1">Happy Students</div>
+                <div className="text-white text-sm mt-1">Happy Students</div>
               </div>
               <div className="text-center">
                 <div className="text-4xl font-bold text-[#F3CF45]">5 Min</div>
-                <div className="text-white/80 text-sm mt-1">Average Time</div>
+                <div className="text-white text-sm mt-1">Average Time</div>
               </div>
               <div className="text-center">
                 <div className="text-4xl font-bold text-[#F3CF45]">100%</div>
-                <div className="text-white/80 text-sm mt-1">Free Forever</div>
+                <div className="text-white text-sm mt-1">Free Forever</div>
               </div>
             </div>
           </div>
