@@ -4,21 +4,28 @@ import heroImg from '../Image/hero.png';
 
 const Home = () => {
   return (
-    <div className="min-h-screen">
-      {/* Hero Section */}
-      <section 
-        className="relative w-full min-h-[90vh] flex flex-col justify-center items-center text-center overflow-hidden"
-        style={{ 
-          backgroundImage: `url(${heroImg})`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center'
-        }}
-      >
-        {/* Dark Overlay to make text readable */}
-        <div className="absolute inset-0 bg-black/60"></div>
-        
-        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 md:py-40">
-          <div className="text-center space-y-8">
+    <>
+      {/* Hero Section - Full Screen with Absolute Positioning */}
+      <div className="relative w-full min-h-screen overflow-hidden">
+        {/* 1. The Background Image Layer (Fixed to top) */}
+        <div 
+          className="absolute inset-0 w-full h-full z-0"
+          style={{
+            backgroundImage: `url(${heroImg})`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+          }}
+        >
+          {/* Dark Overlay */}
+          <div className="absolute inset-0 bg-black/60 z-0"></div>
+          
+          {/* White Fade Overlay (at bottom for smooth transition) */}
+          <div className="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-white via-white/60 to-transparent z-1"></div>
+        </div>
+
+        {/* 2. The Content Layer (On top of image) */}
+        <div className="relative z-10 flex flex-col items-center justify-center min-h-screen text-center px-4">
+          <div className="max-w-7xl mx-auto space-y-8 pt-24">
             {/* Icon with Glow Effect */}
             <div className="inline-block relative animate-fadeInUp">
               <div className="absolute inset-0 bg-[#F3CF45] blur-2xl opacity-50 rounded-3xl"></div>
@@ -56,31 +63,32 @@ const Home = () => {
               
               <Link
                 to="/guideline"
-                className="inline-flex items-center px-10 py-5 glass border-2 border-white/30 text-white rounded-2xl font-bold text-lg hover:bg-white/20 transition-all hover:shadow-xl"
+                className="group relative inline-flex items-center px-10 py-5 glass border-2 border-white/30 text-[#005423] rounded-2xl font-bold text-lg hover:bg-white/20 transition-all hover:shadow-xl overflow-hidden"
               >
-                <BookOpen className="mr-2 h-6 w-6" />
-                View Guidelines
+                <div className="absolute inset-0 bg-white/30 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <BookOpen className="mr-2 h-6 w-6 relative z-10" />
+                <span className="relative z-10">View Guidelines</span>
               </Link>
             </div>
 
             {/* Stats */}
-            <div className="flex flex-wrap justify-center gap-8 pt-12 animate-fadeInUp" style={{animationDelay: '0.6s'}}>
+            <div className="flex flex-wrap justify-center gap-8 pt-12 pb-10 animate-fadeInUp" style={{animationDelay: '0.6s'}}>
               <div className="text-center">
-                <div className="text-4xl font-bold text-[#F3CF45]">1000+</div>
-                <div className="text-white text-sm mt-1">Happy Students</div>
+                <div className="text-4xl md:text-5xl font-extrabold text-green-800">1000+</div>
+                <div className="text-sm md:text-base font-semibold text-green-700 mt-1">Happy Students</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold text-[#F3CF45]">5 Min</div>
-                <div className="text-white text-sm mt-1">Average Time</div>
+                <div className="text-4xl md:text-5xl font-extrabold text-green-800">5 Min</div>
+                <div className="text-sm md:text-base font-semibold text-green-700 mt-1">Average Time</div>
               </div>
               <div className="text-center">
-                <div className="text-4xl font-bold text-[#F3CF45]">100%</div>
-                <div className="text-white text-sm mt-1">Free Forever</div>
+                <div className="text-4xl md:text-5xl font-extrabold text-green-800">100%</div>
+                <div className="text-sm md:text-base font-semibold text-green-700 mt-1">Free Forever</div>
               </div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Features Section */}
       <section className="py-24">
@@ -210,7 +218,7 @@ const Home = () => {
           </div>
         </div>
       </section>
-    </div>
+    </>
   );
 };
 
