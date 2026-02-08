@@ -7,6 +7,7 @@ import logoImg from '../Image/logo.png';
 import varsityNameImg from '../Image/varsitityName.png';
 import footerImg from '../Image/footer.png';
 import ProjectCover from '../components/covers/ProjectCover';
+import { teachersData } from '../data/teachers';
 
 const Create = () => {
   // Tab State
@@ -75,6 +76,11 @@ const Create = () => {
 
   // Auto-save indicator
   const [autoSaved, setAutoSaved] = useState(false);
+
+  // Auto-suggest states
+  const [isGuest, setIsGuest] = useState(false);
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Get current form data based on active tab
   const getCurrentData = () => {
@@ -247,6 +253,31 @@ const Create = () => {
     }
   };
 
+  // Auto-suggest handler functions
+  const handleTeacherSearch = (e, updateFunc, field) => {
+    const value = e.target.value;
+    updateFunc(field, value);
+
+    if (!isGuest && value.trim()) {
+      const filtered = teachersData.filter(teacher =>
+        teacher.name.toLowerCase().includes(value.toLowerCase())
+      );
+      setSuggestions(filtered);
+      setShowSuggestions(true);
+    } else {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const selectTeacher = (teacher, updateFunc) => {
+    updateFunc('teacherName', teacher.name);
+    updateFunc('teacherDesignation', teacher.designation);
+    updateFunc('teacherDept', teacher.department);
+    setSuggestions([]);
+    setShowSuggestions(false);
+  };
+
   const tabs = [
     { id: 'assignment', label: 'Assignment Cover', icon: '📝' },
     { id: 'labReport', label: 'Lab Report Cover', icon: '🔬' },
@@ -336,8 +367,30 @@ const Create = () => {
         <div className="flex flex-col lg:flex-row gap-6 w-full max-w-7xl mx-auto">
           {/* 1. INPUT FORM CONTAINER (First on mobile and desktop) */}
           <div className="w-full lg:w-1/2 space-y-6 order-1">
-            {activeTab === 'assignment' && <AssignmentForm data={assignmentData} updateData={updateAssignment} />}
-            {activeTab === 'labReport' && <LabReportForm data={labReportData} updateData={updateLabReport} />}
+            {activeTab === 'assignment' && (
+              <AssignmentForm 
+                data={assignmentData} 
+                updateData={updateAssignment}
+                isGuest={isGuest}
+                setIsGuest={setIsGuest}
+                handleTeacherSearch={handleTeacherSearch}
+                selectTeacher={selectTeacher}
+                suggestions={suggestions}
+                showSuggestions={showSuggestions}
+              />
+            )}
+            {activeTab === 'labReport' && (
+              <LabReportForm 
+                data={labReportData} 
+                updateData={updateLabReport}
+                isGuest={isGuest}
+                setIsGuest={setIsGuest}
+                handleTeacherSearch={handleTeacherSearch}
+                selectTeacher={selectTeacher}
+                suggestions={suggestions}
+                showSuggestions={showSuggestions}
+              />
+            )}
             {activeTab === 'labIndex' && (
               <LabIndexForm 
                 data={labIndexData} 
@@ -355,6 +408,12 @@ const Create = () => {
                 handleMemberChange={handleMemberChange}
                 addMember={addMember}
                 removeMember={removeMember}
+                isGuest={isGuest}
+                setIsGuest={setIsGuest}
+                handleTeacherSearch={handleTeacherSearch}
+                selectTeacher={selectTeacher}
+                suggestions={suggestions}
+                showSuggestions={showSuggestions}
               />
             )}
           </div>
@@ -382,29 +441,78 @@ const Create = () => {
 // ============================================
 
 // Person Details Form (Teacher & Student)
-const PersonDetailsForm = ({ data, updateData, titleTeacher = "Teacher Details", titleStudent = "Student Details" }) => {
+const PersonDetailsForm = ({ 
+  data, 
+  updateData, 
+  titleTeacher = "Teacher Details", 
+  titleStudent = "Student Details",
+  isGuest,
+  setIsGuest,
+  handleTeacherSearch,
+  selectTeacher,
+  suggestions,
+  showSuggestions
+}) => {
   return (
     <>
       {/* Teacher Details */}
       <FormSection title={titleTeacher} icon="👨‍🏫">
-        <InputField
-          label="Teacher Name"
-          value={data.teacherName}
-          onChange={(e) => updateData('teacherName', e.target.value)}
-          placeholder="Dr. John Doe"
-        />
+        {/* Guest Teacher Toggle */}
+        <div className="mb-4 flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="guestTeacher"
+            checked={isGuest}
+            onChange={(e) => setIsGuest(e.target.checked)}
+            className="w-4 h-4 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500"
+          />
+          <label htmlFor="guestTeacher" className="text-sm font-medium text-gray-700 cursor-pointer">
+            Guest Teacher? (Type manually)
+          </label>
+        </div>
+
+        {/* Teacher Name with Auto-suggest */}
+        <div className="relative">
+          <InputField
+            label="Teacher Name"
+            value={data.teacherName}
+            onChange={(e) => handleTeacherSearch(e, updateData, 'teacherName')}
+            placeholder={isGuest ? "Type guest teacher name" : "Start typing teacher name..."}
+            disabled={false}
+          />
+          
+          {/* Auto-suggest Dropdown */}
+          {!isGuest && showSuggestions && suggestions.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {suggestions.map((teacher, index) => (
+                <div
+                  key={index}
+                  onClick={() => selectTeacher(teacher, updateData)}
+                  className="px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b last:border-b-0 transition-colors"
+                >
+                  <div className="font-medium text-gray-900">{teacher.name}</div>
+                  <div className="text-sm text-gray-600">{teacher.designation}</div>
+                  <div className="text-xs text-gray-500">{teacher.department}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="grid md:grid-cols-2 gap-4">
           <InputField
             label="Designation"
             value={data.teacherDesignation}
             onChange={(e) => updateData('teacherDesignation', e.target.value)}
             placeholder="Professor"
+            disabled={!isGuest}
           />
           <InputField
             label="Department"
             value={data.teacherDept}
             onChange={(e) => updateData('teacherDept', e.target.value)}
             placeholder="Dept. of CSE, IIUC"
+            disabled={!isGuest}
           />
         </div>
       </FormSection>
@@ -454,7 +562,7 @@ const PersonDetailsForm = ({ data, updateData, titleTeacher = "Teacher Details",
 // FORM COMPONENTS FOR EACH TAB
 // ============================================
 
-const AssignmentForm = ({ data, updateData }) => {
+const AssignmentForm = ({ data, updateData, isGuest, setIsGuest, handleTeacherSearch, selectTeacher, suggestions, showSuggestions }) => {
   return (
     <div className="space-y-6">
       {/* Assignment Details */}
@@ -486,7 +594,16 @@ const AssignmentForm = ({ data, updateData }) => {
       </FormSection>
 
       {/* Reuse Person Details */}
-      <PersonDetailsForm data={data} updateData={updateData} />
+      <PersonDetailsForm 
+        data={data} 
+        updateData={updateData}
+        isGuest={isGuest}
+        setIsGuest={setIsGuest}
+        handleTeacherSearch={handleTeacherSearch}
+        selectTeacher={selectTeacher}
+        suggestions={suggestions}
+        showSuggestions={showSuggestions}
+      />
 
       {/* Submission Details */}
       <FormSection title="Submission Details" icon="📅">
@@ -501,7 +618,7 @@ const AssignmentForm = ({ data, updateData }) => {
   );
 };
 
-const LabReportForm = ({ data, updateData }) => {
+const LabReportForm = ({ data, updateData, isGuest, setIsGuest, handleTeacherSearch, selectTeacher, suggestions, showSuggestions }) => {
   return (
     <div className="space-y-6">
       {/* Experiment Details */}
@@ -541,7 +658,16 @@ const LabReportForm = ({ data, updateData }) => {
       </FormSection>
 
       {/* Reuse Person Details */}
-      <PersonDetailsForm data={data} updateData={updateData} />
+      <PersonDetailsForm 
+        data={data} 
+        updateData={updateData}
+        isGuest={isGuest}
+        setIsGuest={setIsGuest}
+        handleTeacherSearch={handleTeacherSearch}
+        selectTeacher={selectTeacher}
+        suggestions={suggestions}
+        showSuggestions={showSuggestions}
+      />
 
       {/* Submission Details */}
       <FormSection title="Submission Details" icon="📅">
@@ -675,7 +801,7 @@ const LabIndexForm = ({ data, updateData, updateExperiment, addExperiment, delet
   );
 };
 
-const ProjectForm = ({ data, updateData, groupMembers, handleMemberChange, addMember, removeMember }) => {
+const ProjectForm = ({ data, updateData, groupMembers, handleMemberChange, addMember, removeMember, isGuest, setIsGuest, handleTeacherSearch, selectTeacher, suggestions, showSuggestions }) => {
   return (
     <div className="space-y-6">
       {/* Project Details */}
@@ -708,24 +834,62 @@ const ProjectForm = ({ data, updateData, groupMembers, handleMemberChange, addMe
 
       {/* Teacher Details */}
       <FormSection title="Teacher Details" icon="👨‍🏫">
-        <InputField
-          label="Teacher Name"
-          value={data.teacherName}
-          onChange={(e) => updateData('teacherName', e.target.value)}
-          placeholder="Dr. John Doe"
-        />
+        {/* Guest Teacher Toggle */}
+        <div className="mb-4 flex items-center gap-2">
+          <input
+            type="checkbox"
+            id="guestTeacherProject"
+            checked={isGuest}
+            onChange={(e) => setIsGuest(e.target.checked)}
+            className="w-4 h-4 text-indigo-600 rounded focus:ring-2 focus:ring-indigo-500"
+          />
+          <label htmlFor="guestTeacherProject" className="text-sm font-medium text-gray-700 cursor-pointer">
+            Guest Teacher? (Type manually)
+          </label>
+        </div>
+
+        {/* Teacher Name with Auto-suggest */}
+        <div className="relative">
+          <InputField
+            label="Teacher Name"
+            value={data.teacherName}
+            onChange={(e) => handleTeacherSearch(e, updateData, 'teacherName')}
+            placeholder={isGuest ? "Type guest teacher name" : "Start typing teacher name..."}
+            disabled={false}
+          />
+          
+          {/* Auto-suggest Dropdown */}
+          {!isGuest && showSuggestions && suggestions.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {suggestions.map((teacher, index) => (
+                <div
+                  key={index}
+                  onClick={() => selectTeacher(teacher, updateData)}
+                  className="px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b last:border-b-0 transition-colors"
+                >
+                  <div className="font-medium text-gray-900">{teacher.name}</div>
+                  <div className="text-sm text-gray-600">{teacher.designation}</div>
+                  <div className="text-xs text-gray-500">{teacher.department}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
         <div className="grid md:grid-cols-2 gap-4">
           <InputField
             label="Designation"
             value={data.teacherDesignation}
             onChange={(e) => updateData('teacherDesignation', e.target.value)}
             placeholder="Professor"
+            disabled={!isGuest}
           />
           <InputField
             label="Department"
             value={data.teacherDept}
             onChange={(e) => updateData('teacherDept', e.target.value)}
             placeholder="Dept. of CSE, IIUC"
+            disabled={!isGuest}
           />
         </div>
       </FormSection>
@@ -821,7 +985,7 @@ const FormSection = ({ title, icon, children }) => {
   );
 };
 
-const InputField = ({ label, value, onChange, placeholder, type = 'text', small = false }) => {
+const InputField = ({ label, value, onChange, placeholder, type = 'text', small = false, disabled = false }) => {
   return (
     <div>
       <label className={`block font-semibold text-gray-700 mb-2 ${small ? 'text-sm' : ''}`}>
@@ -832,7 +996,8 @@ const InputField = ({ label, value, onChange, placeholder, type = 'text', small 
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="input-field w-full focus:ring-2 focus:ring-[#006A4E]/20 transition-all"
+        disabled={disabled}
+        className={`input-field w-full focus:ring-2 focus:ring-[#006A4E]/20 transition-all ${disabled ? 'bg-gray-100 cursor-not-allowed opacity-75' : ''}`}
       />
     </div>
   );
