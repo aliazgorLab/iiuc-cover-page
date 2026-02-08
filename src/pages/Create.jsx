@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { FileText, Plus, Trash2, Download } from 'lucide-react';
 import { toast } from 'react-toastify';
 import html2pdf from 'html2pdf.js';
@@ -73,6 +73,9 @@ const Create = () => {
   // Error state for validation
   const [error, setError] = useState('');
 
+  // Auto-save indicator
+  const [autoSaved, setAutoSaved] = useState(false);
+
   // Get current form data based on active tab
   const getCurrentData = () => {
     switch (activeTab) {
@@ -88,6 +91,101 @@ const Create = () => {
         return {};
     }
   };
+
+  // Load personal data from localStorage on mount
+  useEffect(() => {
+    try {
+      const savedName = localStorage.getItem('studentName');
+      const savedId = localStorage.getItem('studentID');
+      const savedDept = localStorage.getItem('departmentName');
+
+      if (savedName || savedId || savedDept) {
+        // Update assignment data
+        setAssignmentData(prev => ({
+          ...prev,
+          studentName: savedName || '',
+          studentId: savedId || '',
+          studentDept: savedDept || '',
+        }));
+
+        // Update lab report data
+        setLabReportData(prev => ({
+          ...prev,
+          studentName: savedName || '',
+          studentId: savedId || '',
+          studentDept: savedDept || '',
+        }));
+
+        // Update lab index data
+        setLabIndexData(prev => ({
+          ...prev,
+          studentName: savedName || '',
+          studentId: savedId || '',
+        }));
+
+        // Update project data
+        setProjectData(prev => ({
+          ...prev,
+          departmentName: savedDept || '',
+        }));
+
+        // Update first group member with saved data
+        if (savedName || savedId) {
+          setGroupMembers(prev => [
+            {
+              name: savedName || '',
+              id: savedId || '',
+            },
+            ...prev.slice(1)
+          ]);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading saved data:', error);
+    }
+  }, []); // Run once on mount
+
+  // Save personal data to localStorage whenever they change
+  useEffect(() => {
+    let name = '';
+    let id = '';
+    let dept = '';
+
+    // Get the most recent values from any tab
+    // Priority: assignment > labReport > labIndex for name/id
+    name = assignmentData.studentName || labReportData.studentName || labIndexData.studentName || '';
+    id = assignmentData.studentId || labReportData.studentId || labIndexData.studentId || '';
+    dept = assignmentData.studentDept || labReportData.studentDept || projectData.departmentName || '';
+
+    // Also check first group member for project tab
+    if (groupMembers && groupMembers.length > 0) {
+      name = name || groupMembers[0].name || '';
+      id = id || groupMembers[0].id || '';
+    }
+
+    // Save to localStorage (will save even if empty to clear old values)
+    localStorage.setItem('studentName', name);
+    localStorage.setItem('studentID', id);
+    localStorage.setItem('departmentName', dept);
+
+    // Show auto-save indicator only if there's actual data
+    if (name || id || dept) {
+      setAutoSaved(true);
+      const timer = setTimeout(() => setAutoSaved(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [
+    assignmentData.studentName, 
+    assignmentData.studentId, 
+    assignmentData.studentDept,
+    labReportData.studentName, 
+    labReportData.studentId, 
+    labReportData.studentDept,
+    labIndexData.studentName,
+    labIndexData.studentId,
+    projectData.departmentName,
+    groupMembers
+  ]);
 
   // Update handlers
   const updateAssignment = (field, value) => {
@@ -200,6 +298,9 @@ const Create = () => {
     }
   };
 
+  // Get current form data for rendering
+  const data = getCurrentData();
+
   return (
     <div className="min-h-screen pt-32 py-8 w-full overflow-x-hidden">
       <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -267,6 +368,7 @@ const Create = () => {
               onDownload={handleDownloadPDF}
               error={error}
               setError={setError}
+              autoSaved={autoSaved}
             />
           </div>
         </div>
@@ -1184,7 +1286,7 @@ const LabIndex = ({ data }) => {
 // LIVE PREVIEW COMPONENT
 // ============================================
 
-const LivePreview = ({ data, activeTab, previewRef, onDownload, error, setError }) => {
+const LivePreview = ({ data, activeTab, previewRef, onDownload, error, setError, autoSaved }) => {
   // Create reference for the hidden full-size component
   const componentRef = useRef();
 
@@ -1390,6 +1492,12 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload, error, setError 
           {error && (
             <div className="text-red-500 text-sm font-bold mb-2 text-center animate-pulse">
               {error}
+            </div>
+          )}
+          {autoSaved && (
+            <div className="text-green-600 text-sm font-medium mb-2 text-center flex items-center justify-center gap-1">
+              <span className="inline-block w-2 h-2 bg-green-600 rounded-full"></span>
+              Personal details auto-saved
             </div>
           )}
           <div className="flex gap-4">
