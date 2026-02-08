@@ -8,6 +8,7 @@ import varsityNameImg from '../Image/varsitityName.png';
 import footerImg from '../Image/footer.png';
 import ProjectCover from '../components/covers/ProjectCover';
 import { teachersData } from '../data/teachers';
+import { coursesData } from '../data/courses';
 
 const Create = () => {
   // Tab State
@@ -81,6 +82,11 @@ const Create = () => {
   const [isGuest, setIsGuest] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+
+  // Course auto-suggest states
+  const [courseSuggestions, setCourseSuggestions] = useState([]);
+  const [showCourseSuggestions, setShowCourseSuggestions] = useState(false);
+  const [activeField, setActiveField] = useState(''); // 'code' or 'title'
 
   // Get current form data based on active tab
   const getCurrentData = () => {
@@ -278,6 +284,49 @@ const Create = () => {
     setShowSuggestions(false);
   };
 
+  // Course auto-fill handlers
+  const handleCourseCodeSearch = (e, updateFunc) => {
+    const value = e.target.value;
+    updateFunc('courseCode', value);
+    setActiveField('code');
+
+    if (value.trim()) {
+      const filtered = coursesData.filter(course =>
+        course.code.toLowerCase().includes(value.toLowerCase())
+      );
+      setCourseSuggestions(filtered);
+      setShowCourseSuggestions(true);
+    } else {
+      setCourseSuggestions([]);
+      setShowCourseSuggestions(false);
+    }
+  };
+
+  const handleCourseTitleSearch = (e, updateFunc) => {
+    const value = e.target.value;
+    updateFunc('courseTitle', value);
+    setActiveField('title');
+
+    if (value.trim()) {
+      const filtered = coursesData.filter(course =>
+        course.title.toLowerCase().includes(value.toLowerCase())
+      );
+      setCourseSuggestions(filtered);
+      setShowCourseSuggestions(true);
+    } else {
+      setCourseSuggestions([]);
+      setShowCourseSuggestions(false);
+    }
+  };
+
+  const selectCourse = (course, updateFunc) => {
+    updateFunc('courseCode', course.code);
+    updateFunc('courseTitle', course.title);
+    setCourseSuggestions([]);
+    setShowCourseSuggestions(false);
+    setActiveField('');
+  };
+
   const tabs = [
     { id: 'assignment', label: 'Assignment Cover', icon: '📝' },
     { id: 'labReport', label: 'Lab Report Cover', icon: '🔬' },
@@ -377,6 +426,12 @@ const Create = () => {
                 selectTeacher={selectTeacher}
                 suggestions={suggestions}
                 showSuggestions={showSuggestions}
+                handleCourseCodeSearch={handleCourseCodeSearch}
+                handleCourseTitleSearch={handleCourseTitleSearch}
+                selectCourse={selectCourse}
+                courseSuggestions={courseSuggestions}
+                showCourseSuggestions={showCourseSuggestions}
+                activeField={activeField}
               />
             )}
             {activeTab === 'labReport' && (
@@ -389,6 +444,12 @@ const Create = () => {
                 selectTeacher={selectTeacher}
                 suggestions={suggestions}
                 showSuggestions={showSuggestions}
+                handleCourseCodeSearch={handleCourseCodeSearch}
+                handleCourseTitleSearch={handleCourseTitleSearch}
+                selectCourse={selectCourse}
+                courseSuggestions={courseSuggestions}
+                showCourseSuggestions={showCourseSuggestions}
+                activeField={activeField}
               />
             )}
             {activeTab === 'labIndex' && (
@@ -398,6 +459,12 @@ const Create = () => {
                 updateExperiment={updateExperiment}
                 addExperiment={addExperiment}
                 deleteExperiment={deleteExperiment}
+                handleCourseCodeSearch={handleCourseCodeSearch}
+                handleCourseTitleSearch={handleCourseTitleSearch}
+                selectCourse={selectCourse}
+                courseSuggestions={courseSuggestions}
+                showCourseSuggestions={showCourseSuggestions}
+                activeField={activeField}
               />
             )}
             {activeTab === 'project' && (
@@ -414,6 +481,12 @@ const Create = () => {
                 selectTeacher={selectTeacher}
                 suggestions={suggestions}
                 showSuggestions={showSuggestions}
+                handleCourseCodeSearch={handleCourseCodeSearch}
+                handleCourseTitleSearch={handleCourseTitleSearch}
+                selectCourse={selectCourse}
+                courseSuggestions={courseSuggestions}
+                showCourseSuggestions={showCourseSuggestions}
+                activeField={activeField}
               />
             )}
           </div>
@@ -441,6 +514,80 @@ const Create = () => {
 // ============================================
 
 // Person Details Form (Teacher & Student)
+// ============================================
+// REUSABLE FORM SECTIONS
+// ============================================
+
+// Course Details Form with Auto-fill
+const CourseDetailsForm = ({
+  data,
+  updateData,
+  handleCourseCodeSearch,
+  handleCourseTitleSearch,
+  selectCourse,
+  courseSuggestions,
+  showCourseSuggestions,
+  activeField
+}) => {
+  return (
+    <FormSection title="Course Details" icon="📚">
+      <div className="grid md:grid-cols-2 gap-4">
+        {/* Course Code with Auto-suggest */}
+        <div className="relative">
+          <InputField
+            label="Course Code"
+            value={data.courseCode}
+            onChange={(e) => handleCourseCodeSearch(e, updateData)}
+            placeholder="CSE-1101"
+          />
+          
+          {/* Auto-suggest Dropdown for Course Code */}
+          {activeField === 'code' && showCourseSuggestions && courseSuggestions.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {courseSuggestions.map((course, index) => (
+                <div
+                  key={index}
+                  onClick={() => selectCourse(course, updateData)}
+                  className="px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b last:border-b-0 transition-colors"
+                >
+                  <div className="font-semibold text-gray-900">{course.code}</div>
+                  <div className="text-sm text-gray-600">{course.title}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Course Title with Auto-suggest */}
+        <div className="relative">
+          <InputField
+            label="Course Title"
+            value={data.courseTitle}
+            onChange={(e) => handleCourseTitleSearch(e, updateData)}
+            placeholder="Computer Fundamentals"
+          />
+          
+          {/* Auto-suggest Dropdown for Course Title */}
+          {activeField === 'title' && showCourseSuggestions && courseSuggestions.length > 0 && (
+            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+              {courseSuggestions.map((course, index) => (
+                <div
+                  key={index}
+                  onClick={() => selectCourse(course, updateData)}
+                  className="px-4 py-3 hover:bg-indigo-50 cursor-pointer border-b last:border-b-0 transition-colors"
+                >
+                  <div className="font-semibold text-gray-900">{course.title}</div>
+                  <div className="text-sm text-gray-600">{course.code}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </FormSection>
+  );
+};
+
 const PersonDetailsForm = ({ 
   data, 
   updateData, 
@@ -562,7 +709,22 @@ const PersonDetailsForm = ({
 // FORM COMPONENTS FOR EACH TAB
 // ============================================
 
-const AssignmentForm = ({ data, updateData, isGuest, setIsGuest, handleTeacherSearch, selectTeacher, suggestions, showSuggestions }) => {
+const AssignmentForm = ({ 
+  data, 
+  updateData, 
+  isGuest, 
+  setIsGuest, 
+  handleTeacherSearch, 
+  selectTeacher, 
+  suggestions, 
+  showSuggestions,
+  handleCourseCodeSearch,
+  handleCourseTitleSearch,
+  selectCourse,
+  courseSuggestions,
+  showCourseSuggestions,
+  activeField
+}) => {
   return (
     <div className="space-y-6">
       {/* Assignment Details */}
@@ -575,23 +737,17 @@ const AssignmentForm = ({ data, updateData, isGuest, setIsGuest, handleTeacherSe
         />
       </FormSection>
 
-      {/* Course Details */}
-      <FormSection title="Course Details" icon="📚">
-        <div className="grid md:grid-cols-2 gap-4">
-          <InputField
-            label="Course Code"
-            value={data.courseCode}
-            onChange={(e) => updateData('courseCode', e.target.value)}
-            placeholder="CSE-101"
-          />
-          <InputField
-            label="Course Title"
-            value={data.courseTitle}
-            onChange={(e) => updateData('courseTitle', e.target.value)}
-            placeholder="Programming Fundamentals"
-          />
-        </div>
-      </FormSection>
+      {/* Course Details with Auto-fill */}
+      <CourseDetailsForm
+        data={data}
+        updateData={updateData}
+        handleCourseCodeSearch={handleCourseCodeSearch}
+        handleCourseTitleSearch={handleCourseTitleSearch}
+        selectCourse={selectCourse}
+        courseSuggestions={courseSuggestions}
+        showCourseSuggestions={showCourseSuggestions}
+        activeField={activeField}
+      />
 
       {/* Reuse Person Details */}
       <PersonDetailsForm 
@@ -618,7 +774,22 @@ const AssignmentForm = ({ data, updateData, isGuest, setIsGuest, handleTeacherSe
   );
 };
 
-const LabReportForm = ({ data, updateData, isGuest, setIsGuest, handleTeacherSearch, selectTeacher, suggestions, showSuggestions }) => {
+const LabReportForm = ({ 
+  data, 
+  updateData, 
+  isGuest, 
+  setIsGuest, 
+  handleTeacherSearch, 
+  selectTeacher, 
+  suggestions, 
+  showSuggestions,
+  handleCourseCodeSearch,
+  handleCourseTitleSearch,
+  selectCourse,
+  courseSuggestions,
+  showCourseSuggestions,
+  activeField
+}) => {
   return (
     <div className="space-y-6">
       {/* Experiment Details */}
@@ -639,23 +810,17 @@ const LabReportForm = ({ data, updateData, isGuest, setIsGuest, handleTeacherSea
         </div>
       </FormSection>
 
-      {/* Course Details */}
-      <FormSection title="Course Details" icon="📚">
-        <div className="grid md:grid-cols-2 gap-4">
-          <InputField
-            label="Course Code"
-            value={data.courseCode}
-            onChange={(e) => updateData('courseCode', e.target.value)}
-            placeholder="CSE-101"
-          />
-          <InputField
-            label="Course Title"
-            value={data.courseTitle}
-            onChange={(e) => updateData('courseTitle', e.target.value)}
-            placeholder="Microprocessor Lab"
-          />
-        </div>
-      </FormSection>
+      {/* Course Details with Auto-fill */}
+      <CourseDetailsForm
+        data={data}
+        updateData={updateData}
+        handleCourseCodeSearch={handleCourseCodeSearch}
+        handleCourseTitleSearch={handleCourseTitleSearch}
+        selectCourse={selectCourse}
+        courseSuggestions={courseSuggestions}
+        showCourseSuggestions={showCourseSuggestions}
+        activeField={activeField}
+      />
 
       {/* Reuse Person Details */}
       <PersonDetailsForm 
@@ -682,26 +847,32 @@ const LabReportForm = ({ data, updateData, isGuest, setIsGuest, handleTeacherSea
   );
 };
 
-const LabIndexForm = ({ data, updateData, updateExperiment, addExperiment, deleteExperiment }) => {
+const LabIndexForm = ({ 
+  data, 
+  updateData, 
+  updateExperiment, 
+  addExperiment, 
+  deleteExperiment,
+  handleCourseCodeSearch,
+  handleCourseTitleSearch,
+  selectCourse,
+  courseSuggestions,
+  showCourseSuggestions,
+  activeField
+}) => {
   return (
     <div className="space-y-6">
-      {/* Course Details */}
-      <FormSection title="Course Details" icon="📚">
-        <div className="grid md:grid-cols-2 gap-4">
-          <InputField
-            label="Course Code"
-            value={data.courseCode}
-            onChange={(e) => updateData('courseCode', e.target.value)}
-            placeholder="CSE-101"
-          />
-          <InputField
-            label="Course Title"
-            value={data.courseTitle}
-            onChange={(e) => updateData('courseTitle', e.target.value)}
-            placeholder="Microprocessor Lab"
-          />
-        </div>
-      </FormSection>
+      {/* Course Details with Auto-fill */}
+      <CourseDetailsForm
+        data={data}
+        updateData={updateData}
+        handleCourseCodeSearch={handleCourseCodeSearch}
+        handleCourseTitleSearch={handleCourseTitleSearch}
+        selectCourse={selectCourse}
+        courseSuggestions={courseSuggestions}
+        showCourseSuggestions={showCourseSuggestions}
+        activeField={activeField}
+      />
 
       {/* Student Details */}
       <FormSection title="Student Details" icon="🎓">
@@ -785,7 +956,26 @@ const LabIndexForm = ({ data, updateData, updateExperiment, addExperiment, delet
   );
 };
 
-const ProjectForm = ({ data, updateData, groupMembers, handleMemberChange, addMember, removeMember, isGuest, setIsGuest, handleTeacherSearch, selectTeacher, suggestions, showSuggestions }) => {
+const ProjectForm = ({ 
+  data, 
+  updateData, 
+  groupMembers, 
+  handleMemberChange, 
+  addMember, 
+  removeMember, 
+  isGuest, 
+  setIsGuest, 
+  handleTeacherSearch, 
+  selectTeacher, 
+  suggestions, 
+  showSuggestions,
+  handleCourseCodeSearch,
+  handleCourseTitleSearch,
+  selectCourse,
+  courseSuggestions,
+  showCourseSuggestions,
+  activeField
+}) => {
   return (
     <div className="space-y-6">
       {/* Project Details */}
@@ -798,23 +988,17 @@ const ProjectForm = ({ data, updateData, groupMembers, handleMemberChange, addMe
         />
       </FormSection>
 
-      {/* Course Details */}
-      <FormSection title="Course Details" icon="📚">
-        <div className="grid md:grid-cols-2 gap-4">
-          <InputField
-            label="Course Code"
-            value={data.courseCode}
-            onChange={(e) => updateData('courseCode', e.target.value)}
-            placeholder="CSE-401"
-          />
-          <InputField
-            label="Course Title"
-            value={data.courseTitle}
-            onChange={(e) => updateData('courseTitle', e.target.value)}
-            placeholder="Software Engineering"
-          />
-        </div>
-      </FormSection>
+      {/* Course Details with Auto-fill */}
+      <CourseDetailsForm
+        data={data}
+        updateData={updateData}
+        handleCourseCodeSearch={handleCourseCodeSearch}
+        handleCourseTitleSearch={handleCourseTitleSearch}
+        selectCourse={selectCourse}
+        courseSuggestions={courseSuggestions}
+        showCourseSuggestions={showCourseSuggestions}
+        activeField={activeField}
+      />
 
       {/* Teacher Details */}
       <FormSection title="Teacher Details" icon="👨‍🏫">

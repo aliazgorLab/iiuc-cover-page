@@ -1,6 +1,34 @@
 import { Link } from 'react-router-dom';
 import { FileText, BookOpen, Users, Sparkles, Zap, Award, Clock } from 'lucide-react';
 import heroImg from '../Image/hero.png';
+import React from 'react';
+
+// Counter Component for Animated Numbers
+const Counter = ({ end, suffix = "", duration = 2000 }) => {
+  const [count, setCount] = React.useState(0);
+
+  React.useEffect(() => {
+    let startTime;
+    let animationFrame;
+
+    const animate = (timestamp) => {
+      if (!startTime) startTime = timestamp;
+      const progress = timestamp - startTime;
+      const percentage = Math.min(progress / duration, 1);
+
+      setCount(Math.floor(percentage * end));
+
+      if (progress < duration) {
+        animationFrame = requestAnimationFrame(animate);
+      }
+    };
+
+    animationFrame = requestAnimationFrame(animate);
+    return () => cancelAnimationFrame(animationFrame);
+  }, [end, duration]);
+
+  return <span>{count}{suffix}</span>;
+};
 
 const Home = () => {
   return (
@@ -20,7 +48,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-black/60 z-0"></div>
           
           {/* White Fade Overlay (at bottom for smooth transition) */}
-          <div className="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-white via-white/60 to-transparent z-1"></div>
+          <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none z-1"></div>
         </div>
 
         {/* 2. The Content Layer (On top of image) */}
@@ -50,7 +78,7 @@ const Home = () => {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-5 justify-center items-center pt-8 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
+            <div className="flex flex-col sm:flex-row gap-5 justify-center items-center pt-8 mb-32 relative z-20 animate-fadeInUp" style={{animationDelay: '0.4s'}}>
               <Link
                 to="/create"
                 className="group relative inline-flex items-center px-10 py-5 bg-[#F3CF45] text-[#004d38] rounded-2xl font-bold text-lg hover:shadow-2xl hover:shadow-[#F3CF45]/50 transition-all transform hover:scale-105 overflow-hidden"
@@ -70,23 +98,47 @@ const Home = () => {
                 <span className="relative z-10">View Guidelines</span>
               </Link>
             </div>
-
-            {/* Stats */}
-            <div className="flex flex-wrap justify-center gap-8 pt-12 pb-10 animate-fadeInUp" style={{animationDelay: '0.6s'}}>
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-extrabold text-green-800">1000+</div>
-                <div className="text-sm md:text-base font-semibold text-green-700 mt-1">Happy Students</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-extrabold text-green-800">5 Min</div>
-                <div className="text-sm md:text-base font-semibold text-green-700 mt-1">Average Time</div>
-              </div>
-              <div className="text-center">
-                <div className="text-4xl md:text-5xl font-extrabold text-green-800">100%</div>
-                <div className="text-sm md:text-base font-semibold text-green-700 mt-1">Free Forever</div>
-              </div>
-            </div>
           </div>
+        </div>
+      </div>
+
+      {/* Floating Stats Card - Glass Morphism Design */}
+      <div className="relative z-10 -mt-20 pb-16 px-4">
+        <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-white/50 flex flex-col md:flex-row justify-around items-center gap-8 text-center">
+          
+          {/* Stat 1 */}
+          <div className="flex flex-col items-center">
+            <div className="text-4xl mb-2">👨‍🎓</div>
+            <h3 className="text-4xl font-extrabold text-gray-800">
+              <Counter end={1000} suffix="+" />
+            </h3>
+            <p className="text-gray-600 font-medium">Happy Students</p>
+          </div>
+
+          {/* Divider (Hidden on mobile) */}
+          <div className="hidden md:block w-px h-16 bg-gray-300"></div>
+
+          {/* Stat 2 */}
+          <div className="flex flex-col items-center">
+            <div className="text-4xl mb-2">⏱️</div>
+            <h3 className="text-4xl font-extrabold text-gray-800">
+              <Counter end={5} suffix=" Min" duration={1000} />
+            </h3>
+            <p className="text-gray-600 font-medium">Average Time</p>
+          </div>
+
+          {/* Divider */}
+          <div className="hidden md:block w-px h-16 bg-gray-300"></div>
+
+          {/* Stat 3 */}
+          <div className="flex flex-col items-center">
+            <div className="text-4xl mb-2">💸</div>
+            <h3 className="text-4xl font-extrabold text-gray-800">
+              <Counter end={100} suffix="%" />
+            </h3>
+            <p className="text-gray-600 font-medium">Free Forever</p>
+          </div>
+
         </div>
       </div>
 
