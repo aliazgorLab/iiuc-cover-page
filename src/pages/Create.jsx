@@ -52,7 +52,7 @@ const Create = () => {
     studentId: '',
     section: '',
     experiments: [
-      { no: '', date: '', name: '', pageNo: '', remarks: '' }
+      { no: '', date: '', name: '' }
     ]
   });
 
@@ -218,7 +218,7 @@ const Create = () => {
   const addExperiment = () => {
     setLabIndexData(prev => ({
       ...prev,
-      experiments: [...prev.experiments, { no: '', date: '', name: '', pageNo: '', remarks: '' }]
+      experiments: [...prev.experiments, { no: '', date: '', name: '' }]
     }));
   };
 
@@ -767,22 +767,6 @@ const LabIndexForm = ({ data, updateData, updateExperiment, addExperiment, delet
                   placeholder="Enter experiment name"
                   small
                 />
-                <div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
-                  <InputField
-                    label="Page No."
-                    value={exp.pageNo}
-                    onChange={(e) => updateExperiment(index, 'pageNo', e.target.value)}
-                    placeholder="1"
-                    small
-                  />
-                  <InputField
-                    label="Remarks"
-                    value={exp.remarks}
-                    onChange={(e) => updateExperiment(index, 'remarks', e.target.value)}
-                    placeholder="Optional"
-                    small
-                  />
-                </div>
               </div>
             </div>
           ))}
