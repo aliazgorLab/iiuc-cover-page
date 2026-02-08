@@ -543,7 +543,7 @@ const CourseDetailsForm = ({
           
           {/* Auto-suggest Dropdown for Course Code */}
           {activeField === 'code' && showCourseSuggestions && courseSuggestions.length > 0 && (
-            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto">
               {courseSuggestions.map((course, index) => (
                 <div
                   key={index}
@@ -569,7 +569,7 @@ const CourseDetailsForm = ({
           
           {/* Auto-suggest Dropdown for Course Title */}
           {activeField === 'title' && showCourseSuggestions && courseSuggestions.length > 0 && (
-            <div className="absolute z-50 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+            <div className="absolute z-[100] w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto">
               {courseSuggestions.map((course, index) => (
                 <div
                   key={index}
