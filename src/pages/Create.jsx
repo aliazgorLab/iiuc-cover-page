@@ -738,28 +738,32 @@ const AssignmentForm = ({
       </FormSection>
 
       {/* Course Details with Auto-fill */}
-      <CourseDetailsForm
-        data={data}
-        updateData={updateData}
-        handleCourseCodeSearch={handleCourseCodeSearch}
-        handleCourseTitleSearch={handleCourseTitleSearch}
-        selectCourse={selectCourse}
-        courseSuggestions={courseSuggestions}
-        showCourseSuggestions={showCourseSuggestions}
-        activeField={activeField}
-      />
+      <div className="relative z-20">
+        <CourseDetailsForm
+          data={data}
+          updateData={updateData}
+          handleCourseCodeSearch={handleCourseCodeSearch}
+          handleCourseTitleSearch={handleCourseTitleSearch}
+          selectCourse={selectCourse}
+          courseSuggestions={courseSuggestions}
+          showCourseSuggestions={showCourseSuggestions}
+          activeField={activeField}
+        />
+      </div>
 
       {/* Reuse Person Details */}
-      <PersonDetailsForm 
-        data={data} 
-        updateData={updateData}
-        isGuest={isGuest}
-        setIsGuest={setIsGuest}
-        handleTeacherSearch={handleTeacherSearch}
-        selectTeacher={selectTeacher}
-        suggestions={suggestions}
-        showSuggestions={showSuggestions}
-      />
+      <div className="relative z-10">
+        <PersonDetailsForm 
+          data={data} 
+          updateData={updateData}
+          isGuest={isGuest}
+          setIsGuest={setIsGuest}
+          handleTeacherSearch={handleTeacherSearch}
+          selectTeacher={selectTeacher}
+          suggestions={suggestions}
+          showSuggestions={showSuggestions}
+        />
+      </div>
 
       {/* Submission Details */}
       <FormSection title="Submission Details" icon="📅">
@@ -811,28 +815,32 @@ const LabReportForm = ({
       </FormSection>
 
       {/* Course Details with Auto-fill */}
-      <CourseDetailsForm
-        data={data}
-        updateData={updateData}
-        handleCourseCodeSearch={handleCourseCodeSearch}
-        handleCourseTitleSearch={handleCourseTitleSearch}
-        selectCourse={selectCourse}
-        courseSuggestions={courseSuggestions}
-        showCourseSuggestions={showCourseSuggestions}
-        activeField={activeField}
-      />
+      <div className="relative z-20">
+        <CourseDetailsForm
+          data={data}
+          updateData={updateData}
+          handleCourseCodeSearch={handleCourseCodeSearch}
+          handleCourseTitleSearch={handleCourseTitleSearch}
+          selectCourse={selectCourse}
+          courseSuggestions={courseSuggestions}
+          showCourseSuggestions={showCourseSuggestions}
+          activeField={activeField}
+        />
+      </div>
 
       {/* Reuse Person Details */}
-      <PersonDetailsForm 
-        data={data} 
-        updateData={updateData}
-        isGuest={isGuest}
-        setIsGuest={setIsGuest}
-        handleTeacherSearch={handleTeacherSearch}
-        selectTeacher={selectTeacher}
-        suggestions={suggestions}
-        showSuggestions={showSuggestions}
-      />
+      <div className="relative z-10">
+        <PersonDetailsForm 
+          data={data} 
+          updateData={updateData}
+          isGuest={isGuest}
+          setIsGuest={setIsGuest}
+          handleTeacherSearch={handleTeacherSearch}
+          selectTeacher={selectTeacher}
+          suggestions={suggestions}
+          showSuggestions={showSuggestions}
+        />
+      </div>
 
       {/* Submission Details */}
       <FormSection title="Submission Details" icon="📅">
@@ -863,16 +871,18 @@ const LabIndexForm = ({
   return (
     <div className="space-y-6">
       {/* Course Details with Auto-fill */}
-      <CourseDetailsForm
-        data={data}
-        updateData={updateData}
-        handleCourseCodeSearch={handleCourseCodeSearch}
-        handleCourseTitleSearch={handleCourseTitleSearch}
-        selectCourse={selectCourse}
-        courseSuggestions={courseSuggestions}
-        showCourseSuggestions={showCourseSuggestions}
-        activeField={activeField}
-      />
+      <div className="relative z-20">
+        <CourseDetailsForm
+          data={data}
+          updateData={updateData}
+          handleCourseCodeSearch={handleCourseCodeSearch}
+          handleCourseTitleSearch={handleCourseTitleSearch}
+          selectCourse={selectCourse}
+          courseSuggestions={courseSuggestions}
+          showCourseSuggestions={showCourseSuggestions}
+          activeField={activeField}
+        />
+      </div>
 
       {/* Student Details */}
       <FormSection title="Student Details" icon="🎓">
@@ -989,19 +999,22 @@ const ProjectForm = ({
       </FormSection>
 
       {/* Course Details with Auto-fill */}
-      <CourseDetailsForm
-        data={data}
-        updateData={updateData}
-        handleCourseCodeSearch={handleCourseCodeSearch}
-        handleCourseTitleSearch={handleCourseTitleSearch}
-        selectCourse={selectCourse}
-        courseSuggestions={courseSuggestions}
-        showCourseSuggestions={showCourseSuggestions}
-        activeField={activeField}
-      />
+      <div className="relative z-20">
+        <CourseDetailsForm
+          data={data}
+          updateData={updateData}
+          handleCourseCodeSearch={handleCourseCodeSearch}
+          handleCourseTitleSearch={handleCourseTitleSearch}
+          selectCourse={selectCourse}
+          courseSuggestions={courseSuggestions}
+          showCourseSuggestions={showCourseSuggestions}
+          activeField={activeField}
+        />
+      </div>
 
       {/* Teacher Details */}
-      <FormSection title="Teacher Details" icon="👨‍🏫">
+      <div className="relative z-10">
+        <FormSection title="Teacher Details" icon="👨‍🏫">
         {/* Guest Teacher Toggle */}
         <div className="mb-4 flex items-center gap-2">
           <input
@@ -1061,6 +1074,7 @@ const ProjectForm = ({
           />
         </div>
       </FormSection>
+      </div>
 
       {/* Group Members Section */}
       <FormSection title="Group Members" icon="👥">
@@ -1141,7 +1155,7 @@ const ProjectForm = ({
 
 const FormSection = ({ title, icon, children }) => {
   return (
-    <div className="bento-card p-6 w-full">
+    <div className="bento-card p-6 w-full relative">
       <div className="flex items-center gap-2 mb-4 pb-3 border-b-2 border-gray-100">
         <span className="text-2xl">{icon}</span>
         <h3 className="text-lg font-bold text-gray-900">{title}</h3>
