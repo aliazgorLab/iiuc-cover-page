@@ -48,7 +48,7 @@ const Home = () => {
           <div className="absolute inset-0 bg-black/60 z-0"></div>
           
           {/* White Fade Overlay (at bottom for smooth transition) */}
-          <div className="absolute bottom-0 left-0 w-full h-64 bg-gradient-to-t from-white via-white/90 to-transparent pointer-events-none z-1"></div>
+          <div className="absolute bottom-0 left-0 w-full h-96 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none z-0"></div>
         </div>
 
         {/* 2. The Content Layer (On top of image) */}
@@ -73,7 +73,7 @@ const Home = () => {
               
               <p className="text-xl md:text-2xl text-white max-w-3xl mx-auto leading-relaxed font-medium">
                 Create stunning, professional cover pages in seconds. 
-                <span className="block mt-2 text-[#F3CF45] font-bold">✨ Designed for Excellence ✨</span>
+                
               </p>
             </div>
 
@@ -104,7 +104,7 @@ const Home = () => {
 
       {/* Floating Stats Card - Glass Morphism Design */}
       <div className="relative z-10 -mt-20 pb-16 px-4">
-        <div className="max-w-4xl mx-auto bg-white/80 backdrop-blur-md shadow-2xl rounded-2xl p-8 border border-white/50 flex flex-col md:flex-row justify-around items-center gap-8 text-center">
+        <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-around items-center gap-8 text-center">
           
           {/* Stat 1 */}
           <div className="flex flex-col items-center">
