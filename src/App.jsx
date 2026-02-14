@@ -7,12 +7,14 @@ import Home from './pages/Home';
 import Create from './pages/Create';
 import Guideline from './pages/Guideline';
 import About from './pages/About';
+import Presentation from './pages/Presentation';
 
 function App() {
   return (
     <BrowserRouter>
       <ScrollToTop />
       <Routes>
+        <Route path="/presentation" element={<Presentation />} />
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
           <Route path="create" element={<Create />} />
@@ -32,6 +34,7 @@ function App() {
         pauseOnHover
         theme="light"
       />
+      <Analytics />
     </BrowserRouter>
   );
 }

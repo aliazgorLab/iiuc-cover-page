@@ -665,13 +665,14 @@ const PersonDetailsForm = ({
       </FormSection>
 
       {/* Student Details */}
-      <FormSection title={titleStudent} icon="🎓">
-        <InputField
-          label="Student Name"
-          value={data.studentName}
-          onChange={(e) => updateData('studentName', e.target.value)}
-          placeholder="Your Full Name"
-        />
+      <div className="mt-8">
+        <FormSection title={titleStudent} icon="🎓">
+          <InputField
+            label="Student Name"
+            value={data.studentName}
+            onChange={(e) => updateData('studentName', e.target.value)}
+            placeholder="Your Full Name"
+          />
         <div className="grid md:grid-cols-2 gap-4">
           <InputField
             label="Student ID"
@@ -700,7 +701,8 @@ const PersonDetailsForm = ({
             placeholder="CSE"
           />
         </div>
-      </FormSection>
+        </FormSection>
+      </div>
     </>
   );
 };
