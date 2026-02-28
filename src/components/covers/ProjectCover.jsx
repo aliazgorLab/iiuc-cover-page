@@ -196,7 +196,7 @@ const ProjectCover = ({
 
             {/* Footer: Date of Submission */}
             <div className="footer-date">
-              DATE OF SUBMISSION: {date || '[SUBMISSION_DATE]'}
+              DATE OF SUBMISSION: {date || ''}
             </div>
 
             {/* Campus Footer Image */}

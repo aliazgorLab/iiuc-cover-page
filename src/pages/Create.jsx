@@ -335,46 +335,161 @@ const Create = () => {
   ];
 
   // Ref for PDF download
-  const previewRef = useRef(null);
+  const componentRef = useRef(null);
+
+  // Validation function
+  const validateForm = () => {
+    setError('');
+
+    if (activeTab === 'project') {
+      const data = getCurrentData();
+      if (!data.courseCode || !data.courseTitle || !data.projectTitle) {
+        setError('Please fill in all required fields: Course Code, Course Title, and Project Title!');
+        return false;
+      }
+      if (!data.teacherName) {
+        setError('Please fill in Teacher Name!');
+        return false;
+      }
+      if (!data.departmentName) {
+        setError('Please fill in Department Name!');
+        return false;
+      }
+      if (!groupMembers || groupMembers.length === 0) {
+        setError('Please add at least one group member!');
+        return false;
+      }
+      const hasValidMember = groupMembers.some(member => member.name && member.id);
+      if (!hasValidMember) {
+        setError('Please fill in Name and ID for at least one group member!');
+        return false;
+      }
+      return true;
+    }
+
+    const data = getCurrentData();
+    if (!data.studentName || !data.studentId) {
+      setError('Please fill in Student Name and Student ID!');
+      return false;
+    }
+
+    if (activeTab === 'assignment') {
+      if (!data.courseCode || !data.courseTitle || !data.assignmentTitle) {
+        setError('Please fill in all required fields: Course Code, Course Title, and Assignment Title!');
+        return false;
+      }
+      if (!data.teacherName) {
+        setError('Please fill in Teacher Name!');
+        return false;
+      }
+    } else if (activeTab === 'labReport') {
+      if (!data.courseCode || !data.courseTitle) {
+        setError('Please fill in Course Code and Course Title!');
+        return false;
+      }
+      if (!data.experimentNo || !data.experimentName) {
+        setError('Please fill in Experiment No and Experiment Name!');
+        return false;
+      }
+      if (!data.teacherName) {
+        setError('Please fill in Teacher Name!');
+        return false;
+      }
+    } else if (activeTab === 'labIndex') {
+      if (!data.courseCode || !data.courseTitle) {
+        setError('Please fill in Course Code and Course Title!');
+        return false;
+      }
+      if (!data.section) {
+        setError('Please fill in Section!');
+        return false;
+      }
+    }
+
+    return true;
+  };
 
   // Download PDF function
-  const handleDownloadPDF = async () => {
-    if (!previewRef.current) return;
+  const handleDownloadPDF = () => {
+    // Validate form before proceeding
+    if (!validateForm()) return;
+
+    const element = componentRef.current;
+    
+    if (!element) {
+      toast.error('Unable to generate PDF. Please try again.');
+      return;
+    }
+    
+    toast.info('Generating PDF...');
+
+    const data = getCurrentData();
+    const filePrefix = activeTab === 'assignment' ? 'Assignment' : 
+                       activeTab === 'labReport' ? 'LabReport' : 
+                       activeTab === 'project' ? 'ProjectReport' :
+                       'LabIndex';
+
+    const options = {
+      margin: 0,
+      filename: `${filePrefix}_${data.studentId || 'Cover'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(options).from(element).save()
+      .then(() => {
+        toast.success('PDF downloaded successfully!');
+      })
+      .catch((error) => {
+        console.error('PDF generation error:', error);
+        toast.error('Failed to generate PDF. Please try again.');
+      });
+  };
+
+  // Download JPG function
+  const handleDownloadJPG = async () => {
+    // Validate form before proceeding
+    if (!validateForm()) return;
+
+    const element = componentRef.current;
+    
+    if (!element) {
+      toast.error('Unable to generate JPG. Please try again.');
+      return;
+    }
+
+    toast.info('Generating JPG...');
 
     try {
-      // Dynamic import for better code splitting
-      const html2canvas = (await import('html2canvas')).default;
-      const jsPDF = (await import('jspdf')).default;
-
-      // Get the preview element
-      const element = previewRef.current;
-      
-      // Create canvas from HTML
       const canvas = await html2canvas(element, {
-        scale: 2, // Higher quality
+        scale: 2,
         useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
+        backgroundColor: "#ffffff"
       });
 
-      // Calculate PDF dimensions (A4)
-      const imgWidth = 210; // A4 width in mm
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      
-      // Create PDF
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgData = canvas.toDataURL('image/png');
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-      
-      // Generate filename
-      const filename = `${activeTab}_${getCurrentData().studentName || 'document'}_${Date.now()}.pdf`;
-      
-      // Download
-      pdf.save(filename);
+      const imageData = canvas.toDataURL('image/jpeg', 1.0);
+      const link = document.createElement('a');
+
+      const data = getCurrentData();
+      const filePrefix = activeTab === 'assignment' ? 'Assignment' : 
+                         activeTab === 'labReport' ? 'LabReport' : 
+                         activeTab === 'project' ? 'ProjectReport' :
+                         'LabIndex';
+
+      if (typeof link.download === 'string') {
+        link.href = imageData;
+        link.download = `${filePrefix}_${data.studentId || 'Cover'}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success('JPG downloaded successfully!');
+      } else {
+        window.open(imageData);
+      }
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      alert('Failed to generate PDF. Please try again.');
+      console.error('JPG generation error:', error);
+      toast.error('Failed to generate JPG. Please try again.');
     }
   };
 
@@ -496,10 +611,10 @@ const Create = () => {
             <LivePreview 
               data={getCurrentData()} 
               activeTab={activeTab} 
-              previewRef={previewRef}
-              onDownload={handleDownloadPDF}
+              componentRef={componentRef}
+              onDownloadPDF={handleDownloadPDF}
+              onDownloadJPG={handleDownloadJPG}
               error={error}
-              setError={setError}
               autoSaved={autoSaved}
             />
           </div>
@@ -1304,7 +1419,7 @@ const AssignmentCover = ({ data }) => {
               </div>
             </div>
             <div className="footer-details">
-              <div className="date">DATE OF SUBMISSION : {data.submissionDate || '[SUBMISSION_DATE]'}</div>
+              <div className="date">DATE OF SUBMISSION : {data.submissionDate || ''}</div>
               <div className="remark-box">
                 <span className="remark-text">REMARK:</span>
               </div>
@@ -1446,7 +1561,7 @@ const LabReportCover = ({ data }) => {
               </div>
             </div>
             <div className="footer-details">
-              <div className="date">DATE OF SUBMISSION : {data.submissionDate || '[SUBMISSION_DATE]'}</div>
+              <div className="date">DATE OF SUBMISSION : {data.submissionDate || ''}</div>
               <div className="remark-box">
                 <span className="remark-text">REMARK:</span>
               </div>
@@ -1635,169 +1750,7 @@ const LabIndex = ({ data }) => {
 // LIVE PREVIEW COMPONENT
 // ============================================
 
-const LivePreview = ({ data, activeTab, previewRef, onDownload, error, setError, autoSaved }) => {
-  // Create reference for the hidden full-size component
-  const componentRef = useRef();
-
-  // Validation function to check required fields
-  const validateForm = () => {
-    // Clear any previous error
-    setError('');
-
-    // For project tab, validate group members and department
-    if (activeTab === 'project') {
-      if (!data.courseCode || !data.courseTitle || !data.projectTitle) {
-        setError('Please fill in all required fields: Course Code, Course Title, and Project Title!');
-        return false;
-      }
-      if (!data.teacherName || !data.date) {
-        setError('Please fill in Teacher Name and Date of Submission!');
-        return false;
-      }
-      if (!data.departmentName) {
-        setError('Please fill in Department Name!');
-        return false;
-      }
-      if (!data.groupMembers || data.groupMembers.length === 0) {
-        setError('Please add at least one group member!');
-        return false;
-      }
-      // Check if at least one member has both name and ID filled
-      const hasValidMember = data.groupMembers.some(member => member.name && member.id);
-      if (!hasValidMember) {
-        setError('Please fill in Name and ID for at least one group member!');
-        return false;
-      }
-      return true;
-    }
-
-    // Common required fields for all other tabs
-    if (!data.studentName || !data.studentId) {
-      setError('Please fill in Student Name and Student ID!');
-      return false;
-    }
-
-    // Tab-specific validation
-    if (activeTab === 'assignment') {
-      if (!data.courseCode || !data.courseTitle || !data.assignmentTitle) {
-        setError('Please fill in all required fields: Course Code, Course Title, and Assignment Title!');
-        return false;
-      }
-      if (!data.teacherName || !data.submissionDate) {
-        setError('Please fill in Teacher Name and Submission Date!');
-        return false;
-      }
-    } else if (activeTab === 'labReport') {
-      if (!data.courseCode || !data.courseTitle) {
-        setError('Please fill in Course Code and Course Title!');
-        return false;
-      }
-      if (!data.experimentNo || !data.experimentName) {
-        setError('Please fill in Experiment No and Experiment Name!');
-        return false;
-      }
-      if (!data.teacherName || !data.submissionDate) {
-        setError('Please fill in Teacher Name and Submission Date!');
-        return false;
-      }
-    } else if (activeTab === 'labIndex') {
-      if (!data.courseCode || !data.courseTitle) {
-        setError('Please fill in Course Code and Course Title!');
-        return false;
-      }
-      if (!data.section) {
-        setError('Please fill in Section!');
-        return false;
-      }
-    }
-
-    return true;
-  };
-
-  // Download PDF directly using html2pdf.js
-  const handleDownload = () => {
-    // Validate form before proceeding
-    if (!validateForm()) return;
-
-    const element = componentRef.current;
-    
-    if (!element) {
-      toast.error('Unable to generate PDF. Please try again.');
-      return;
-    }
-    
-    toast.info('Generating PDF...');
-
-    // Dynamic filename based on active tab
-    const filePrefix = activeTab === 'assignment' ? 'Assignment' : 
-                       activeTab === 'labReport' ? 'LabReport' : 
-                       activeTab === 'project' ? 'ProjectReport' :
-                       'LabIndex';
-
-    const options = {
-      margin: 0,
-      filename: `${filePrefix}_${data.studentId || 'Cover'}.pdf`,
-      image: { type: 'jpeg', quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
-    };
-
-    html2pdf().set(options).from(element).save()
-      .then(() => {
-        toast.success('PDF downloaded successfully!');
-      })
-      .catch((error) => {
-        console.error('PDF generation error:', error);
-        toast.error('Failed to generate PDF. Please try again.');
-      });
-  };
-
-  // Download JPG using html2canvas
-  const handleDownloadJPG = async () => {
-    // Validate form before proceeding
-    if (!validateForm()) return;
-
-    const element = componentRef.current;
-    
-    if (!element) {
-      toast.error('Unable to generate JPG. Please try again.');
-      return;
-    }
-
-    toast.info('Generating JPG...');
-
-    try {
-      const canvas = await html2canvas(element, {
-        scale: 2, // Higher scale for better quality
-        useCORS: true, // Helps with images
-        backgroundColor: "#ffffff" // Ensure white background
-      });
-
-      const imageData = canvas.toDataURL('image/jpeg', 1.0);
-      const link = document.createElement('a');
-
-      // Dynamic filename based on active tab
-      const filePrefix = activeTab === 'assignment' ? 'Assignment' : 
-                         activeTab === 'labReport' ? 'LabReport' : 
-                         activeTab === 'project' ? 'ProjectReport' :
-                         'LabIndex';
-
-      if (typeof link.download === 'string') {
-        link.href = imageData;
-        link.download = `${filePrefix}_${data.studentId || 'Cover'}.jpg`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        toast.success('JPG downloaded successfully!');
-      } else {
-        window.open(imageData);
-      }
-    } catch (error) {
-      console.error('JPG generation error:', error);
-      toast.error('Failed to generate JPG. Please try again.');
-    }
-  };
-
+const LivePreview = ({ data, activeTab, componentRef, onDownloadPDF, onDownloadJPG, error, autoSaved }) => {
   const getTabLabel = () => {
     switch (activeTab) {
       case 'assignment':
@@ -1851,7 +1804,7 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload, error, setError,
           )}
           <div className="flex gap-4">
             <button 
-              onClick={handleDownload}
+              onClick={onDownloadPDF}
               className="flex-1 py-3 bg-gradient-to-r from-[#006A4E] to-[#00805d] text-white rounded-xl font-bold hover:shadow-lg hover:shadow-[#006A4E]/30 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!data || Object.keys(data).length === 0}
             >
@@ -1859,7 +1812,7 @@ const LivePreview = ({ data, activeTab, previewRef, onDownload, error, setError,
               Download PDF
             </button>
             <button 
-              onClick={handleDownloadJPG}
+              onClick={onDownloadJPG}
               className="flex-1 py-3 bg-white text-[#006A4E] border-2 border-[#006A4E] rounded-xl font-bold hover:bg-[#006A4E]/5 hover:shadow-lg transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               disabled={!data || Object.keys(data).length === 0}
             >
