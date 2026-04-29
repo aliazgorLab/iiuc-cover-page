@@ -59,10 +59,10 @@ const Footer = () => {
               <div className="space-y-3 text-sm">
                 <p className="text-white/90 leading-relaxed">
                   <span className="font-semibold">International Islamic University Chittagong</span><br />
-                  Kumira, Chittagong, <span className="text-[#F3CF45]">Bangladesh</span>
+                  Kumira, Chittagong, <span className="text-[#FFFFFF]">Bangladesh</span>
                 </p>
                 <p className="text-white/90">
-                  <span className="text-[#F3CF45] font-medium">Email:</span> ali.azgor0810@gmail.com
+                  <span className="text-[#F3CF45] font-medium">Email:</span> ali.azgor.0810@gmail.com
                 </p>
                 <p className="text-white/90">
                   <span className="text-[#F3CF45] font-medium">Phone:</span> +880 01867704636
