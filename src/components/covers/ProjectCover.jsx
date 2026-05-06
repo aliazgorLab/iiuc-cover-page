@@ -117,7 +117,7 @@ const ProjectCover = ({
             </div>
 
             {/* Project Title */}
-            <div className="project-title">PROJECT REPORTS</div>
+            <div className="project-title">PROPOSAL REPORT</div>
 
             {/* Course Info Box - Centered */}
             <div className="course-info-box">
