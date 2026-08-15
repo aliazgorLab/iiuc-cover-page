@@ -71,7 +71,7 @@ export const useStudentAcademicInfo = () => {
   }, [isAuthenticated, useSavedInfo, user, getProfileObject, setStudentInfo, hydrateProfile]);
 
   useEffect(() => {
-    if (user) {
+    if (user && isAuthenticated) {
       const formatted = getProfileObject(user);
       setAcademicInfo(formatted);
       setStudentInfo(formatted);
@@ -86,9 +86,12 @@ export const useStudentAcademicInfo = () => {
           semester: formatted.semester,
         });
       }
+      fetchStudentProfile();
+    } else {
+      const emptyInfo = { name: '', studentId: '', department: '', section: '', semester: '', batch: '' };
+      setAcademicInfo(emptyInfo);
     }
-    fetchStudentProfile();
-  }, [user, fetchStudentProfile, getProfileObject, hydrateProfile, setStudentInfo, useSavedInfo]);
+  }, [user, isAuthenticated, fetchStudentProfile, getProfileObject, hydrateProfile, setStudentInfo, useSavedInfo]);
 
   const isSaved = Boolean(academicInfo.name || academicInfo.studentId);
 

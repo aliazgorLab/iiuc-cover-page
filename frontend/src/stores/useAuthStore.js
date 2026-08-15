@@ -1,4 +1,6 @@
 import { create } from 'zustand';
+import { useUserStore } from './useUserStore';
+import { useCoverStore } from './useCoverStore';
 
 const getInitialUser = () => {
   try {
@@ -14,6 +16,20 @@ const initialToken = typeof window !== 'undefined' ? localStorage.getItem('token
 
 import { API_BASE_URL } from '../config/apiConfig';
 
+const clearStudentSession = () => {
+  localStorage.removeItem('token');
+  localStorage.removeItem('user');
+  localStorage.removeItem('studentName');
+  localStorage.removeItem('studentID');
+  localStorage.removeItem('departmentName');
+  try {
+    useUserStore.getState().clearProfile();
+  } catch (e) {}
+  try {
+    useCoverStore.getState().clearStudentInfo();
+  } catch (e) {}
+};
+
 export const useAuthStore = create((set, get) => ({
   user: initialUser,
   token: initialToken,
@@ -22,7 +38,10 @@ export const useAuthStore = create((set, get) => ({
   isLoading: false,
   error: null,
 
-  setGuestMode: () => set({ isGuest: true, user: null, isAuthenticated: false }),
+  setGuestMode: () => {
+    clearStudentSession();
+    set({ isGuest: true, user: null, isAuthenticated: false });
+  },
 
   setAuth: (user, token) => {
     localStorage.setItem('token', token);
@@ -55,8 +74,7 @@ export const useAuthStore = create((set, get) => ({
           set({ user: data.user, isAuthenticated: true, isGuest: false });
         }
       } else if (res.status === 401 || res.status === 403) {
-        localStorage.removeItem('token');
-        localStorage.removeItem('user');
+        clearStudentSession();
         set({ user: null, token: null, isAuthenticated: false, isGuest: true });
       }
     } catch (err) {
@@ -65,8 +83,7 @@ export const useAuthStore = create((set, get) => ({
   },
 
   logout: () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+    clearStudentSession();
     set({ user: null, token: null, isAuthenticated: false, isGuest: true });
   },
 }));

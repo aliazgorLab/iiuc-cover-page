@@ -4,6 +4,7 @@ import { toast } from 'react-toastify';
 import { ShieldCheck, FileText, Sparkles, Clock, Trash2, CheckCircle2 } from 'lucide-react';
 import { useCoverStore } from '../stores/useCoverStore';
 import { useUserStore } from '../stores/useUserStore';
+import { useAuthStore } from '../stores/useAuthStore';
 import { useStudentAcademicInfo } from '../hooks/useStudentAcademicInfo';
 import AssignmentForm from '../features/cover-generator/assignment/AssignmentForm';
 import AssignmentCover from '../features/cover-generator/assignment/AssignmentCover';
@@ -56,6 +57,7 @@ const Create = () => {
   } = useCoverStore();
 
   const { studentName, studentId, departmentName, updateField } = useUserStore();
+  const { isAuthenticated, isGuest } = useAuthStore();
 
   const [draftPrompt, setDraftPrompt] = useState(null);
   const [lastDraftSavedTime, setLastDraftSavedTime] = useState(null);
@@ -161,8 +163,10 @@ const Create = () => {
     setDraftPrompt(null);
   };
 
-  // Sync profile edits into user store
+  // Sync profile edits into user store (only if authenticated)
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     let name = assignmentData.studentName || labReportData.studentName || labIndexData.studentName || '';
     let id = assignmentData.studentId || labReportData.studentId || labIndexData.studentId || '';
     let dept = assignmentData.studentDept || labReportData.studentDept || projectData.departmentName || '';
@@ -178,6 +182,7 @@ const Create = () => {
       updateField('departmentName', dept);
     }
   }, [
+    isAuthenticated,
     assignmentData.studentName,
     assignmentData.studentId,
     assignmentData.studentDept,
@@ -392,10 +397,11 @@ const Create = () => {
             </div>
 
             <StudentProfileCard
-              studentName={studentName}
-              studentId={studentId}
-              departmentName={departmentName}
+              studentName={isAuthenticated ? studentName : ''}
+              studentId={isAuthenticated ? studentId : ''}
+              departmentName={isAuthenticated ? departmentName : ''}
               autoSaved={autoSaved}
+              isGuest={!isAuthenticated || isGuest}
             />
           </div>
 

@@ -264,6 +264,42 @@ export const useCoverStore = create((set, get) => ({
     }));
   },
 
+  clearStudentInfo: () =>
+    set((state) => ({
+      studentInfo: { name: '', id: '', department: '', section: '' },
+      assignmentData: {
+        ...state.assignmentData,
+        studentName: '',
+        studentId: '',
+        studentDept: '',
+        section: '',
+        semester: '',
+      },
+      labReportData: {
+        ...state.labReportData,
+        studentName: '',
+        studentId: '',
+        studentDept: '',
+        section: '',
+        semester: '',
+      },
+      labIndexData: {
+        ...state.labIndexData,
+        studentName: '',
+        studentId: '',
+        section: '',
+        semester: '',
+      },
+      projectData: {
+        ...state.projectData,
+        departmentName: '',
+        section: '',
+        semester: '',
+      },
+      groupMembers: [{ name: '', id: '' }],
+    })),
+
+
   getCurrentData: () => {
     const state = get();
     switch (state.activeTab) {

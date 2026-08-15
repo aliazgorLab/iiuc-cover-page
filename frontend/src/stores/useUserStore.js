@@ -27,4 +27,15 @@ export const useUserStore = create((set, get) => ({
     }
     set({ [field]: value });
   },
+
+  clearProfile: () => {
+    localStorage.removeItem('studentName');
+    localStorage.removeItem('studentID');
+    localStorage.removeItem('departmentName');
+    set({
+      studentName: '',
+      studentId: '',
+      departmentName: '',
+    });
+  },
 }));
