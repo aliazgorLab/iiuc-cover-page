@@ -15,6 +15,7 @@ import Presentation from './pages/Presentation';
 import LoginPage from './pages/LoginPage';
 import AdminRoute from './components/AdminRoute';
 import DevAuthDiagnostic from './components/ui/DevAuthDiagnostic';
+import VersionUpdateModal from './components/ui/VersionUpdateModal';
 import { useAuthStore } from './stores/useAuthStore';
 
 // Student Dashboard imports
@@ -53,6 +54,7 @@ function App() {
     <BrowserRouter>
       <ScrollToTop />
       <DevAuthDiagnostic />
+      <VersionUpdateModal />
       <Routes>
         <Route path="/presentation" element={<Presentation />} />
 
