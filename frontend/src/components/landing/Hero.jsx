@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShieldCheck, ArrowRight, LogIn, CheckCircle2, FileCheck2, Download, Sparkles } from 'lucide-react';
-import campusBg from '../../image/hero.png';
+import campusBg from '../../Image/hero.png';
 import coverImage from '../../Design page/hero image.png';
 
 export const Hero = () => {
