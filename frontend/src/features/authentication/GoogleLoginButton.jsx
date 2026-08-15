@@ -5,14 +5,14 @@ import { toast } from 'react-toastify';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { useUserStore } from '../../stores/useUserStore';
 
+import { API_BASE_URL } from '../../config/apiConfig';
+
 export const GoogleLoginButton = ({ onSuccessRedirect = '/dashboard' }) => {
   const navigate = useNavigate();
   const setAuth = useAuthStore((state) => state.setAuth);
   const setStudentProfile = useUserStore((state) => state.setStudentProfile);
   const [isLoading, setIsLoading] = useState(false);
   const [isLoginProcessing, setIsLoginProcessing] = useState(false);
-
-  const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
 
   const handleGoogleSuccess = async (credentialResponse) => {
     if (isLoginProcessing) return;
@@ -21,7 +21,7 @@ export const GoogleLoginButton = ({ onSuccessRedirect = '/dashboard' }) => {
     toast.info('Verifying IIUC Academic Identity with Server...');
 
     try {
-      const response = await fetch(`${API_BASE}/auth/google`, {
+      const response = await fetch(`${API_BASE_URL}/auth/google`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

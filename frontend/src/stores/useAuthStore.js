@@ -12,6 +12,8 @@ const getInitialUser = () => {
 const initialUser = getInitialUser();
 const initialToken = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
 
+import { API_BASE_URL } from '../config/apiConfig';
+
 export const useAuthStore = create((set, get) => ({
   user: initialUser,
   token: initialToken,
@@ -42,8 +44,7 @@ export const useAuthStore = create((set, get) => ({
     if (!token) return;
 
     try {
-      const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1';
-      const res = await fetch(`${API_BASE}/auth/me`, {
+      const res = await fetch(`${API_BASE_URL}/auth/me`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
