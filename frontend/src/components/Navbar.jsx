@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, FileText, User, LogIn, LogOut, ChevronDown, LayoutDashboard, History, Settings } from 'lucide-react';
+import { Menu, X, FileText, User, LogIn, LogOut, ChevronDown, LayoutDashboard, History, Settings, Bell, Sparkles } from 'lucide-react';
 import { useAuthStore } from '../stores/useAuthStore';
 import { toast } from 'react-toastify';
 import iiucLogo from '../Image/logo.png';
@@ -76,6 +76,17 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
+
+            {/* Notification Bell / Release Notes Trigger */}
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('open-release-notes'))}
+              className="relative p-2 rounded-xl text-slate-700 hover:bg-emerald-50 hover:text-[#006A4E] transition-colors cursor-pointer ml-1"
+              title="What's New in IIUC Platform Release v2.0"
+              aria-label="View Version Release Notes"
+            >
+              <Bell className="h-4 w-4" />
+              <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#006A4E] ring-2 ring-white animate-pulse" />
+            </button>
 
             {/* Auth Widget State */}
             {isAuthenticated ? (
@@ -176,6 +187,17 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
+
+            <button
+              onClick={() => {
+                setIsMenuOpen(false);
+                window.dispatchEvent(new CustomEvent('open-release-notes'));
+              }}
+              className="flex items-center gap-2 w-full px-4 py-2.5 rounded-lg text-sm font-semibold text-[#006A4E] bg-emerald-50/80 hover:bg-emerald-100/80 transition-colors"
+            >
+              <Bell className="h-4 w-4" />
+              <span>What's New (Release Notes v2.0)</span>
+            </button>
 
             {isAuthenticated ? (
               <div className="pt-2 border-t border-slate-100 space-y-2">

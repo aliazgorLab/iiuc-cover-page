@@ -8,6 +8,10 @@ export const VersionUpdateModal = () => {
   const VERSION_KEY = 'iiuc_release_notes_v2_0';
 
   useEffect(() => {
+    // Listen for manual trigger from Navbar notification bell
+    const handleManualOpen = () => setIsOpen(true);
+    window.addEventListener('open-release-notes', handleManualOpen);
+
     // Check if the user has already dismissed this version release modal
     const hasSeenRelease = localStorage.getItem(VERSION_KEY);
     if (!hasSeenRelease) {
@@ -15,8 +19,13 @@ export const VersionUpdateModal = () => {
       const timer = setTimeout(() => {
         setIsOpen(true);
       }, 600);
-      return () => clearTimeout(timer);
+      return () => {
+        clearTimeout(timer);
+        window.removeEventListener('open-release-notes', handleManualOpen);
+      };
     }
+
+    return () => window.removeEventListener('open-release-notes', handleManualOpen);
   }, []);
 
   const handleClose = () => {
