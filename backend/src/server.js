@@ -89,6 +89,8 @@ app.get(['/', '/health', '/api/health', '/api/v1/health'], (req, res) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/student', userRoutes);
+app.use('/api/student', userRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/v1/teachers', teacherRoutes);
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/templates', templateRoutes);

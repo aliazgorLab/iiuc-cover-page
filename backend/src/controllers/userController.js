@@ -14,21 +14,28 @@ export const getProfile = async (req, res, next) => {
 
 export const getStudentAcademicProfile = async (req, res, next) => {
   try {
-    const user = await User.findById(req.user._id).select('name studentId department section semester batch academicInfo');
+    const user = await User.findById(req.user._id).select('name studentId department section semester batch academicProfile academicInfo');
     if (!user) return sendError(res, 'Student profile not found', 404);
 
-    const academicInfo = {
-      name: user.academicInfo?.name || user.name || '',
-      studentId: user.academicInfo?.studentId || user.studentId || '',
-      department: user.academicInfo?.department || user.department || '',
-      section: user.academicInfo?.section || user.section || '',
-      semester: user.academicInfo?.semester || user.semester || '',
-      batch: user.academicInfo?.batch || user.batch || '',
+    const academicProfile = {
+      studentName: user.academicProfile?.studentName || user.academicInfo?.name || user.name || '',
+      studentId: user.academicProfile?.studentId || user.academicInfo?.studentId || user.studentId || '',
+      department: user.academicProfile?.department || user.academicInfo?.department || user.department || '',
+      batch: user.academicProfile?.batch || user.academicInfo?.batch || user.batch || '',
+      semester: user.academicProfile?.semester || user.academicInfo?.semester || user.semester || '',
+      section: user.academicProfile?.section || user.academicInfo?.section || user.section || '',
     };
 
     return res.status(200).json({
       success: true,
-      academicInfo,
+      studentName: academicProfile.studentName,
+      studentId: academicProfile.studentId,
+      department: academicProfile.department,
+      batch: academicProfile.batch,
+      semester: academicProfile.semester,
+      section: academicProfile.section,
+      academicProfile,
+      academicInfo: academicProfile,
     });
   } catch (error) {
     next(error);
@@ -49,12 +56,23 @@ export const updateProfile = async (req, res, next) => {
     if (semester !== undefined) user.semester = semester;
     if (section !== undefined) user.section = section;
 
-    // Maintain synchronized academicInfo subdocument
+    // Maintain synchronized academicProfile and academicInfo subdocuments
+    user.academicProfile = {
+      studentName: user.name || '',
+      studentId: user.studentId || '',
+      department: user.department || '',
+      batch: user.batch || '',
+      semester: user.semester || '',
+      section: user.section || '',
+    };
+
     user.academicInfo = {
       name: user.name || '',
       studentId: user.studentId || '',
       department: user.department || '',
       section: user.section || '',
+      semester: user.semester || '',
+      batch: user.batch || '',
     };
 
     const updatedUser = await user.save();
@@ -67,6 +85,7 @@ export const updateProfile = async (req, res, next) => {
       batch: updatedUser.batch,
       semester: updatedUser.semester,
       section: updatedUser.section,
+      academicProfile: updatedUser.academicProfile,
       academicInfo: updatedUser.academicInfo,
       avatar: updatedUser.avatar,
       role: updatedUser.role,

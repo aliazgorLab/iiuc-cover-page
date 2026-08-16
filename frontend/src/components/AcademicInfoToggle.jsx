@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Edit3, Sparkles } from 'lucide-react';
+import { ShieldCheck, Edit3, Sparkles, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuthStore } from '../stores/useAuthStore';
-import { useStudentAcademicInfo } from '../hooks/useStudentAcademicInfo';
+import { useStudentProfile } from '../hooks/useStudentProfile';
 
 export const AcademicInfoToggle = ({ onSyncToForm }) => {
   const { isAuthenticated } = useAuthStore();
@@ -12,20 +12,48 @@ export const AcademicInfoToggle = ({ onSyncToForm }) => {
     department,
     section,
     semester,
+    batch,
     isSaved,
+    isLoading,
     useSavedInfo,
     setUseSavedInfo,
-  } = useStudentAcademicInfo();
+  } = useStudentProfile();
+
+  if (isLoading) {
+    return (
+      <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 flex items-center gap-2 animate-pulse">
+        <Loader2 className="h-4 w-4 text-[#006A4E] animate-spin" />
+        <span>Loading academic profile...</span>
+      </div>
+    );
+  }
 
   if (!isAuthenticated) {
     return (
-      <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-1.5">
+      <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-600 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
           <Sparkles className="h-4 w-4 text-[#006A4E]" />
           <span>Log in to auto-fill your academic details in 1-click across all cover pages.</span>
         </div>
         <Link to="/login" className="text-[11px] font-extrabold text-[#006A4E] hover:underline shrink-0">
           Log In →
+        </Link>
+      </div>
+    );
+  }
+
+  if (!isSaved) {
+    return (
+      <div className="p-3.5 bg-amber-50 border border-amber-200 rounded-xl text-xs font-semibold text-amber-900 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <AlertCircle className="h-4 w-4 text-amber-600 shrink-0" />
+          <span>Complete your student profile to enable automatic cover filling</span>
+        </div>
+        <Link
+          to="/dashboard/profile"
+          className="text-[11px] font-extrabold text-[#006A4E] hover:underline shrink-0 bg-white px-2.5 py-1 rounded-md border border-amber-200 shadow-2xs"
+        >
+          Complete Profile →
         </Link>
       </div>
     );
@@ -41,6 +69,7 @@ export const AcademicInfoToggle = ({ onSyncToForm }) => {
         department,
         section,
         semester,
+        batch,
       });
     }
   };
@@ -75,7 +104,7 @@ export const AcademicInfoToggle = ({ onSyncToForm }) => {
         </Link>
       </div>
 
-      {useSavedInfo && isSaved ? (
+      {useSavedInfo ? (
         <div className="pl-6 text-[11px] font-bold text-emerald-900 flex flex-wrap items-center gap-1.5">
           <span className="bg-white/80 px-2 py-0.5 rounded border border-emerald-200 shadow-2xs">
             {studentName || 'Name'}
@@ -105,11 +134,11 @@ export const AcademicInfoToggle = ({ onSyncToForm }) => {
             </>
           )}
         </div>
-      ) : !useSavedInfo ? (
+      ) : (
         <p className="pl-6 text-[11px] text-slate-500 font-medium">
           Manual input mode active. Fields below can be customized without altering your saved profile.
         </p>
-      ) : null}
+      )}
     </div>
   );
 };

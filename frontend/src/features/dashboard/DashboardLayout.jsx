@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, User, History, FileText, ArrowLeft, Shield, LogOut, CheckSquare, Layers } from 'lucide-react';
+import { LayoutDashboard, User, History, FileText, ArrowLeft, Shield, LogOut, Layers } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { toast } from 'react-toastify';
 
@@ -15,7 +15,6 @@ export const DashboardLayout = () => {
   const links = [
     { path: '/dashboard', label: 'Overview', icon: LayoutDashboard },
     { path: '/dashboard/profile', label: 'Student Profile', icon: User },
-    { path: '/dashboard/complete-profile', label: 'Setup Academic Info', icon: CheckSquare },
     { path: '/dashboard/history', label: 'Cover History', icon: History },
     { path: '/dashboard/lab-index-history', label: 'My Lab Indexes', icon: Layers },
     { path: '/dashboard/templates', label: 'Saved Templates', icon: FileText },

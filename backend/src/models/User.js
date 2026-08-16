@@ -19,11 +19,21 @@ const userSchema = new mongoose.Schema(
     batch: { type: String, trim: true, default: '' },
     semester: { type: String, trim: true, default: '' },
     section: { type: String, trim: true, default: '' },
+    academicProfile: {
+      studentName: { type: String, trim: true, default: '' },
+      studentId: { type: String, trim: true, default: '' },
+      department: { type: String, trim: true, default: '' },
+      batch: { type: String, trim: true, default: '' },
+      semester: { type: String, trim: true, default: '' },
+      section: { type: String, trim: true, default: '' },
+    },
     academicInfo: {
       name: { type: String, trim: true, default: '' },
       studentId: { type: String, trim: true, default: '' },
       department: { type: String, trim: true, default: '' },
       section: { type: String, trim: true, default: '' },
+      semester: { type: String, trim: true, default: '' },
+      batch: { type: String, trim: true, default: '' },
     },
     role: {
       type: String,

@@ -12,7 +12,7 @@ export const validateGoogleAuthPayload = (req, res, next) => {
 };
 
 export const validateProfileUpdatePayload = (req, res, next) => {
-  const { name, studentId, department } = req.body;
+  const { name, studentId, department, batch, semester, section } = req.body;
   if (!name || typeof name !== 'string' || name.trim() === '') {
     return sendError(res, 'Student name is required.', 400);
   }
@@ -21,6 +21,15 @@ export const validateProfileUpdatePayload = (req, res, next) => {
   }
   if (!department || typeof department !== 'string' || department.trim() === '') {
     return sendError(res, 'Department is required.', 400);
+  }
+  if (!batch || typeof batch !== 'string' || batch.trim() === '') {
+    return sendError(res, 'Batch is required.', 400);
+  }
+  if (!semester || typeof semester !== 'string' || semester.trim() === '') {
+    return sendError(res, 'Semester is required.', 400);
+  }
+  if (!section || typeof section !== 'string' || section.trim() === '') {
+    return sendError(res, 'Section is required.', 400);
   }
   next();
 };

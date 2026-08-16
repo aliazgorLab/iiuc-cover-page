@@ -22,7 +22,6 @@ import { useAuthStore } from './stores/useAuthStore';
 import DashboardLayout from './features/dashboard/DashboardLayout';
 import StudentDashboard from './features/dashboard/StudentDashboard';
 import ProfileView from './features/dashboard/ProfileView';
-import CompleteProfileView from './features/dashboard/CompleteProfileView';
 import CoverHistory from './features/dashboard/CoverHistory';
 import StudentLabIndexHistory from './features/dashboard/StudentLabIndexHistory';
 import TemplateGallery from './features/templates/TemplateGallery';
@@ -76,7 +75,7 @@ function App() {
           <Route element={<DashboardLayout />}>
             <Route index element={<StudentDashboard />} />
             <Route path="profile" element={<ProfileView />} />
-            <Route path="complete-profile" element={<CompleteProfileView />} />
+            <Route path="complete-profile" element={<Navigate to="/dashboard/profile" replace />} />
             <Route path="history" element={<CoverHistory />} />
             <Route path="lab-index-history" element={<StudentLabIndexHistory />} />
             <Route path="templates" element={<TemplateGallery />} />
