@@ -18,6 +18,8 @@ const initialAssignment = {
 const initialLabReport = {
   experimentNo: '',
   experimentName: '',
+  includeExperimentDate: false,
+  experimentDate: '',
   courseCode: '',
   courseTitle: '',
   teacherName: '',
@@ -106,7 +108,17 @@ export const useCoverStore = create((set, get) => ({
       assignmentData: { ...state.assignmentData, [field]: value },
     })),
 
+  updateAssignmentField: (field, value) =>
+    set((state) => ({
+      assignmentData: { ...state.assignmentData, [field]: value },
+    })),
+
   updateLabReport: (field, value) =>
+    set((state) => ({
+      labReportData: { ...state.labReportData, [field]: value },
+    })),
+
+  updateLabReportField: (field, value) =>
     set((state) => ({
       labReportData: { ...state.labReportData, [field]: value },
     })),
@@ -114,6 +126,36 @@ export const useCoverStore = create((set, get) => ({
   updateLabIndex: (field, value) =>
     set((state) => ({
       labIndexData: { ...state.labIndexData, [field]: value },
+    })),
+
+  updateLabIndexField: (field, value) =>
+    set((state) => ({
+      labIndexData: { ...state.labIndexData, [field]: value },
+    })),
+
+  setAssignmentData: (data) =>
+    set((state) => ({
+      assignmentData: { ...initialAssignment, ...data },
+    })),
+
+  setLabReportData: (data) =>
+    set((state) => ({
+      labReportData: { ...initialLabReport, ...data },
+    })),
+
+  setLabIndexData: (data) =>
+    set((state) => ({
+      labIndexData: { ...initialLabIndex, ...data },
+    })),
+
+  setProjectData: (data) =>
+    set((state) => ({
+      projectData: { ...initialProject, ...data },
+    })),
+
+  updateProjectField: (field, value) =>
+    set((state) => ({
+      projectData: { ...state.projectData, [field]: value },
     })),
 
   updateExperiment: (index, field, value) =>

@@ -81,7 +81,7 @@ const Navbar = () => {
             <button
               onClick={() => window.dispatchEvent(new CustomEvent('open-release-notes'))}
               className="relative p-2 rounded-xl text-slate-700 hover:bg-emerald-50 hover:text-[#006A4E] transition-colors cursor-pointer ml-1"
-              title="What's New in IIUC Platform Release v2.0"
+              title="What's New in IIUC Platform Release v2.1"
               aria-label="View Version Release Notes"
             >
               <Bell className="h-4 w-4" />
@@ -196,7 +196,7 @@ const Navbar = () => {
               className="flex items-center gap-2 w-full px-4 py-2.5 rounded-lg text-sm font-semibold text-[#006A4E] bg-emerald-50/80 hover:bg-emerald-100/80 transition-colors"
             >
               <Bell className="h-4 w-4" />
-              <span>What's New (Release Notes v2.0)</span>
+              <span>What's New (Release Notes v2.1)</span>
             </button>
 
             {isAuthenticated ? (

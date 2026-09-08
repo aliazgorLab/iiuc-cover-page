@@ -42,6 +42,34 @@ export const LabReportForm = () => {
             onChange={(e) => updateLabReport('experimentName', e.target.value)}
             placeholder="Enter experiment name"
           />
+
+          {/* Optional Date of Experiment */}
+          <div className="pt-2 space-y-3">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="includeExperimentDate"
+                checked={Boolean(labReportData.includeExperimentDate)}
+                onChange={(e) => updateLabReport('includeExperimentDate', e.target.checked)}
+                className="w-4 h-4 text-[#006A4E] rounded focus:ring-2 focus:ring-[#006A4E]/30 accent-[#006A4E] cursor-pointer"
+              />
+              <label
+                htmlFor="includeExperimentDate"
+                className="text-xs font-semibold text-gray-700 cursor-pointer select-none"
+              >
+                Add Date of Experiment
+              </label>
+            </div>
+
+            {labReportData.includeExperimentDate && (
+              <FormInput
+                label="Date of Experiment"
+                type="date"
+                value={labReportData.experimentDate || ''}
+                onChange={(e) => updateLabReport('experimentDate', e.target.value)}
+              />
+            )}
+          </div>
         </div>
       </div>
 

@@ -3,6 +3,23 @@ import logoImg from '../../../Image/logo.png';
 import varsityNameImg from '../../../Image/varsitityName.png';
 import footerImg from '../../../Image/footer.png';
 
+const formatDisplayDate = (dateStr) => {
+  if (!dateStr) return '';
+  const parts = dateStr.split('-');
+  if (parts.length === 3 && parts[0].length === 4) {
+    const [year, month, day] = parts;
+    const d = new Date(year, parseInt(month, 10) - 1, day);
+    if (!isNaN(d.getTime())) {
+      return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+    }
+  }
+  const d = new Date(dateStr);
+  if (!isNaN(d.getTime())) {
+    return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+  }
+  return dateStr;
+};
+
 export const LabReportCover = ({ data }) => {
   return (
     <div className="preview-wrapper">
@@ -122,7 +139,14 @@ export const LabReportCover = ({ data }) => {
               </div>
             </div>
             <div className="footer-details">
-              <div className="date">DATE OF SUBMISSION : {data?.submissionDate || ''}</div>
+              <div className="dates-block">
+                {data?.includeExperimentDate && data?.experimentDate && (
+                  <div className="date" style={{ marginBottom: '4px' }}>
+                    DATE OF EXPERIMENT : {formatDisplayDate(data.experimentDate)}
+                  </div>
+                )}
+                <div className="date">DATE OF SUBMISSION : {data?.submissionDate || ''}</div>
+              </div>
               <div className="remark-box">
                 <span className="remark-text">REMARK:</span>
               </div>
