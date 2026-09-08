@@ -1162,8 +1162,8 @@ export const sendTestAnnouncementEmail = async (req, res, next) => {
     if (isAuthError) {
       return sendError(
         res,
-        'SMTP authentication failed. Please verify SMTP_USER and SMTP_PASS in environment configuration.',
-        500
+        'SMTP authentication failed. Please verify SMTP_USER and SMTP_PASS.',
+        400
       );
     }
 
