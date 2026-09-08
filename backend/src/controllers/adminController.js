@@ -1149,9 +1149,24 @@ export const sendTestAnnouncementEmail = async (req, res, next) => {
       ctaText,
     });
 
-    return sendSuccess(res, `Test announcement email sent to ${testEmail}`);
+    return sendSuccess(res, `Test announcement email sent successfully to ${testEmail}`);
   } catch (error) {
-    console.error('Test Email Broadcast Error:', error);
+    console.error('Test Email Broadcast Error:', error.message);
+
+    const isAuthError =
+      error.code === 'EAUTH' ||
+      error.responseCode === 535 ||
+      error.message?.includes('535') ||
+      error.message?.includes('Invalid credentials');
+
+    if (isAuthError) {
+      return sendError(
+        res,
+        'SMTP authentication failed. Please verify SMTP_USER and SMTP_PASS in environment configuration.',
+        500
+      );
+    }
+
     return sendError(res, `Failed to send test email: ${error.message}`, 500);
   }
 };

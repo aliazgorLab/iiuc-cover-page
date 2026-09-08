@@ -12,17 +12,59 @@ export const validateAcademicEmail = (email) => {
   return ALLOWED_DOMAINS.some((domain) => lower.endsWith(domain));
 };
 
-export const sendVerificationEmail = async (email, token) => {
-  const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${token}`;
+export const createTransporter = () => {
+  const host = process.env.SMTP_HOST || 'smtp.mailtrap.io';
+  const port = Number(process.env.SMTP_PORT) || 2525;
+  const isSecure = port === 465;
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.mailtrap.io',
-    port: Number(process.env.SMTP_PORT) || 2525,
+  return nodemailer.createTransport({
+    host,
+    port,
+    secure: isSecure,
     auth: {
       user: process.env.SMTP_USER || '',
       pass: process.env.SMTP_PASS || '',
     },
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
+};
+
+export const verifySmtpConnection = async () => {
+  const host = process.env.SMTP_HOST || 'smtp.mailtrap.io';
+  const port = Number(process.env.SMTP_PORT) || 2525;
+  const user = process.env.SMTP_USER || '';
+  const maskedUser = user
+    ? `${user.slice(0, 2)}***${user.includes('@') ? '@' + user.split('@')[1] : ''}`
+    : 'unconfigured';
+
+  console.log(`[SMTP Diagnostic] Target: ${host}:${port} | User: ${maskedUser}`);
+
+  try {
+    const transporter = createTransporter();
+    await transporter.verify();
+    console.log(`✓ [SMTP Diagnostic] Connection & authentication verified successfully.`);
+    return { success: true, message: 'SMTP connection verified successfully.' };
+  } catch (error) {
+    const isAuthError =
+      error.code === 'EAUTH' ||
+      error.responseCode === 535 ||
+      error.message?.includes('535') ||
+      error.message?.includes('Invalid credentials');
+
+    const message = isAuthError
+      ? 'SMTP authentication failed. Please verify SMTP_USER and SMTP_PASS in environment configuration.'
+      : `SMTP connection error: ${error.message}`;
+
+    console.warn(`⚠️ [SMTP Diagnostic] ${message}`);
+    return { success: false, isAuthError, message };
+  }
+};
+
+export const sendVerificationEmail = async (email, token) => {
+  const verificationUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/verify-email?token=${token}`;
+  const transporter = createTransporter();
 
   const mailOptions = {
     from: '"IIUC Cover Page Portal" <no-reply@iiuc.ac.bd>',
@@ -86,14 +128,7 @@ export const sendAnnouncementEmail = async ({
     ? ctaUrl.trim()
     : `${process.env.FRONTEND_URL || 'https://iiuccoverpage.vercel.app'}`;
 
-  const transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.mailtrap.io',
-    port: Number(process.env.SMTP_PORT) || 2525,
-    auth: {
-      user: process.env.SMTP_USER || '',
-      pass: process.env.SMTP_PASS || '',
-    },
-  });
+  const transporter = createTransporter();
 
   const htmlContent = `
     <!DOCTYPE html>

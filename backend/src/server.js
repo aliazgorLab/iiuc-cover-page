@@ -10,6 +10,7 @@ import mongoose from 'mongoose';
 import { connectDB } from './config/database.js';
 import { validateEnv } from './config/validateEnv.js';
 import { logger } from './utils/logger.js';
+import { verifySmtpConnection } from './services/emailService.js';
 
 import authRoutes from './routes/authRoutes.js';
 import userRoutes from './routes/userRoutes.js';
@@ -36,8 +37,9 @@ validateEnv();
 const app = express();
 const DEFAULT_PORT = parseInt(process.env.PORT || '5000', 10);
 
-// Connect Database
+// Connect Database & Verify SMTP Health
 connectDB();
+verifySmtpConnection();
 
 // Security & Optimization Middleware Audit
 app.use(requestIdMiddleware);
