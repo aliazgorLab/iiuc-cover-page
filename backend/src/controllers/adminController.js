@@ -84,6 +84,105 @@ export const getAdminStats = async (req, res, next) => {
   }
 };
 
+export const getAdminAnalytics = async (req, res, next) => {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const thirtyDaysAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+
+    const [
+      totalStudents,
+      activeStudents,
+      suspendedStudents,
+      totalCovers,
+      monthCovers,
+      todayCovers,
+      totalTeachers,
+      coversByType,
+      coversByDept,
+      teachersByDept,
+      dailyTrendRaw,
+    ] = await Promise.all([
+      User.countDocuments({ role: 'STUDENT' }),
+      User.countDocuments({ role: 'STUDENT', accountStatus: 'ACTIVE' }),
+      User.countDocuments({ role: 'STUDENT', accountStatus: { $in: ['SUSPENDED', 'BLOCKED'] } }),
+      Cover.countDocuments(),
+      Cover.countDocuments({ createdAt: { $gte: startOfMonth } }),
+      Cover.countDocuments({ createdAt: { $gte: today } }),
+      Teacher.countDocuments({ status: 'ACTIVE' }),
+      Cover.aggregate([
+        { $group: { _id: '$coverType', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
+      Cover.aggregate([
+        { $group: { _id: '$department', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
+      Teacher.aggregate([
+        { $group: { _id: '$department', count: { $sum: 1 } } },
+        { $sort: { count: -1 } },
+      ]),
+      Cover.aggregate([
+        { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+        {
+          $group: {
+            _id: {
+              $dateToString: { format: '%m/%d', date: '$createdAt' },
+            },
+            covers: { $sum: 1 },
+          },
+        },
+        { $sort: { _id: 1 } },
+      ]),
+    ]);
+
+    const mostUsedTemplate = coversByType.length > 0 && coversByType[0]._id ? `${coversByType[0]._id} Cover` : 'Assignment Cover';
+    const mostActiveDept = coversByDept.length > 0 && coversByDept[0]._id ? coversByDept[0]._id : 'Dept. of Computer Science & Engineering';
+
+    const dailyTrendMap = new Map();
+    for (let i = 29; i >= 0; i--) {
+      const d = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+      const mm = String(d.getMonth() + 1).padStart(2, '0');
+      const dd = String(d.getDate()).padStart(2, '0');
+      const key = `${mm}/${dd}`;
+      dailyTrendMap.set(key, 0);
+    }
+
+    dailyTrendRaw.forEach((item) => {
+      if (item._id && dailyTrendMap.has(item._id)) {
+        dailyTrendMap.set(item._id, item.covers);
+      }
+    });
+
+    const dailyTrend = Array.from(dailyTrendMap.entries()).map(([displayDate, covers]) => ({
+      displayDate,
+      covers,
+    }));
+
+    return sendSuccess(res, 'Analytics data retrieved successfully', {
+      kpi: {
+        totalStudents,
+        activeStudents,
+        suspendedStudents,
+        totalCovers,
+        monthCovers,
+        todayCovers,
+        mostUsedTemplate,
+        mostActiveDept,
+        totalTeachers,
+      },
+      dailyTrend,
+      coversByType,
+      coversByDept,
+      teachersByDept,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ─────────────────────────────────────────────
 // STUDENT MANAGEMENT
 // ─────────────────────────────────────────────
@@ -1129,18 +1228,19 @@ export const getBroadcastRecipientsCount = async (req, res, next) => {
 
 export const sendTestAnnouncementEmail = async (req, res, next) => {
   try {
-    const { testEmail, subject, title, badgeText, announcementBody, ctaUrl, ctaText } = req.body;
+    const { to, testEmail, subject, title, badgeText, announcementBody, ctaUrl, ctaText } = req.body;
+    const recipient = (to || testEmail || '').trim();
 
-    if (!testEmail || typeof testEmail !== 'string') {
-      return sendError(res, 'A valid test email address is required.', 400);
+    if (!recipient) {
+      return sendError(res, 'A valid test recipient email address is required.', 400, { errorCode: 'INVALID_RECIPIENT' });
     }
 
     if (!announcementBody || announcementBody.trim().length === 0) {
-      return sendError(res, 'Announcement message body is required.', 400);
+      return sendError(res, 'Announcement message body is required.', 400, { errorCode: 'INVALID_ANNOUNCEMENT' });
     }
 
-    await sendAnnouncementEmail({
-      to: testEmail.trim(),
+    const info = await sendAnnouncementEmail({
+      to: recipient,
       subject,
       title,
       badgeText,
@@ -1149,9 +1249,12 @@ export const sendTestAnnouncementEmail = async (req, res, next) => {
       ctaText,
     });
 
-    return sendSuccess(res, `Test announcement email sent successfully to ${testEmail}`);
+    return sendSuccess(res, `Test announcement email sent successfully to ${recipient}`, {
+      messageId: info?.messageId || null,
+      recipient,
+    });
   } catch (error) {
-    console.error('Test Email Broadcast Error:', error.message);
+    console.error('[Test Email Broadcast Error]:', error.message);
 
     const isAuthError =
       error.code === 'EAUTH' ||
@@ -1162,12 +1265,18 @@ export const sendTestAnnouncementEmail = async (req, res, next) => {
     if (isAuthError) {
       return sendError(
         res,
-        'SMTP authentication failed. Please verify SMTP_USER and SMTP_PASS.',
-        400
+        'SMTP authentication failed. Please verify the configured SMTP credentials or provider authentication method.',
+        400,
+        { errorCode: 'SMTP_AUTH_FAILED' }
       );
     }
 
-    return sendError(res, `Failed to send test email: ${error.message}`, 500);
+    return sendError(
+      res,
+      `Failed to send test email: ${error.message}`,
+      500,
+      { errorCode: 'SMTP_SEND_FAILED' }
+    );
   }
 };
 

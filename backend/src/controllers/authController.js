@@ -19,11 +19,12 @@ const extractStudentId = (email) => {
   return '';
 };
 
-// Generate Short-Lived Access Token (15m) and Refresh Token (30d) for enterprise security
+// Generate Access Token (using process.env.JWT_EXPIRES_IN || '7d') and Refresh Token (30d) for enterprise session management
 const generateTokens = (userId, role) => {
   const secret = process.env.JWT_SECRET || 'iiuc_super_secret_jwt_key_2026';
+  const expiresIn = process.env.JWT_EXPIRES_IN || '7d';
   
-  const accessToken = jwt.sign({ id: userId, role }, secret, { expiresIn: '15m' });
+  const accessToken = jwt.sign({ id: userId, role }, secret, { expiresIn });
   const refreshToken = jwt.sign({ id: userId, type: 'refresh' }, secret, { expiresIn: '30d' });
 
   return { accessToken, refreshToken };
