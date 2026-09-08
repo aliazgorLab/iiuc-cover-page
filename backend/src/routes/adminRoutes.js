@@ -50,6 +50,12 @@ import {
   getAdminSessions,
   revokeAdminSession,
 
+  // Announcements & Email Broadcast
+  getBroadcastRecipientsCount,
+  sendTestAnnouncementEmail,
+  sendBroadcastEmail,
+  getBroadcastLogs,
+
   // Database Debug
   getDatabaseDebug,
 } from '../controllers/adminController.js';
@@ -128,5 +134,11 @@ router.delete('/notifications/:id', deleteNotification);
 // Security & Sessions
 router.get('/profile/sessions', getAdminSessions);
 router.post('/profile/sessions/:id/revoke', revokeAdminSession);
+
+// Email Broadcast & Announcements
+router.post('/announcement/count', requirePermission('MANAGE_USERS'), getBroadcastRecipientsCount);
+router.post('/announcement/test-email', requirePermission('MANAGE_USERS'), sendTestAnnouncementEmail);
+router.post('/announcement/send-email', requirePermission('MANAGE_USERS'), sendBroadcastEmail);
+router.get('/announcement/history', requirePermission('MANAGE_USERS'), getBroadcastLogs);
 
 export default router;

@@ -8,6 +8,8 @@ import Course from '../models/Course.js';
 import AdminActivity from '../models/AdminActivity.js';
 import AdminNotification from '../models/AdminNotification.js';
 import UserSession from '../models/UserSession.js';
+import BroadcastLog from '../models/BroadcastLog.js';
+import { sendAnnouncementEmail, validateAcademicEmail, isValidUrl } from '../services/emailService.js';
 import { sendSuccess, sendError } from '../utils/response.js';
 import { logAdminActivity } from '../utils/activityLogger.js';
 import { exportToCSV } from '../utils/csvExporter.js';
@@ -1079,3 +1081,247 @@ export const revokeAdminSession = async (req, res, next) => {
     next(error);
   }
 };
+
+// ─────────────────────────────────────────────
+// ADMIN EMAIL BROADCAST & ANNOUNCEMENT SYSTEM
+// ─────────────────────────────────────────────
+
+export const getBroadcastRecipientsCount = async (req, res, next) => {
+  try {
+    const { targetType = 'ALL', department = '', selectedUserIds = [] } = req.body;
+
+    let query = { accountStatus: { $ne: 'BLOCKED' } };
+
+    if (targetType === 'DEPARTMENT') {
+      if (!department) {
+        return sendError(res, 'Department name is required for department target.', 400);
+      }
+      query.department = new RegExp(`^${department.trim()}$`, 'i');
+    } else if (targetType === 'SELECTIVE') {
+      if (!Array.isArray(selectedUserIds) || selectedUserIds.length === 0) {
+        return sendError(res, 'At least one student must be selected for selective target.', 400);
+      }
+      query._id = { $in: selectedUserIds };
+    }
+
+    const eligibleUsers = await User.find(query)
+      .select('name email studentId department')
+      .lean();
+
+    const validRecipients = eligibleUsers.filter((u) => u.email && u.email.trim().length > 0);
+
+    return sendSuccess(res, 'Recipient count calculated', {
+      targetType,
+      department,
+      recipientCount: validRecipients.length,
+      recipients: validRecipients.map((u) => ({
+        id: u._id,
+        name: u.name,
+        email: u.email,
+        studentId: u.studentId || 'N/A',
+        department: u.department || 'N/A',
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const sendTestAnnouncementEmail = async (req, res, next) => {
+  try {
+    const { testEmail, subject, title, badgeText, announcementBody, ctaUrl, ctaText } = req.body;
+
+    if (!testEmail || typeof testEmail !== 'string') {
+      return sendError(res, 'A valid test email address is required.', 400);
+    }
+
+    if (!announcementBody || announcementBody.trim().length === 0) {
+      return sendError(res, 'Announcement message body is required.', 400);
+    }
+
+    await sendAnnouncementEmail({
+      to: testEmail.trim(),
+      subject,
+      title,
+      badgeText,
+      announcementBody,
+      ctaUrl,
+      ctaText,
+    });
+
+    return sendSuccess(res, `Test announcement email sent to ${testEmail}`);
+  } catch (error) {
+    console.error('Test Email Broadcast Error:', error);
+    return sendError(res, `Failed to send test email: ${error.message}`, 500);
+  }
+};
+
+export const sendBroadcastEmail = async (req, res, next) => {
+  try {
+    const {
+      broadcastId,
+      targetType = 'ALL',
+      department = '',
+      selectedUserIds = [],
+      subject,
+      title,
+      badgeText,
+      announcementBody,
+      ctaUrl,
+      ctaText,
+    } = req.body;
+
+    if (!subject || subject.trim().length === 0) {
+      return sendError(res, 'Email subject line is required.', 400);
+    }
+
+    if (!title || title.trim().length === 0) {
+      return sendError(res, 'Announcement title is required.', 400);
+    }
+
+    if (!announcementBody || announcementBody.trim().length === 0) {
+      return sendError(res, 'Announcement message body is required.', 400);
+    }
+
+    const safeBroadcastId = broadcastId || `bcast_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`;
+
+    // Idempotency check: prevent duplicate broadcast execution
+    const existingLog = await BroadcastLog.findOne({ broadcastId: safeBroadcastId });
+    if (existingLog) {
+      return sendError(
+        res,
+        `Broadcast with ID "${safeBroadcastId}" is already processing or completed. Duplicate request blocked.`,
+        409
+      );
+    }
+
+    // Server-side source of truth query for recipients
+    let query = { accountStatus: { $ne: 'BLOCKED' } };
+    if (targetType === 'DEPARTMENT') {
+      if (!department) return sendError(res, 'Department name is required.', 400);
+      query.department = new RegExp(`^${department.trim()}$`, 'i');
+    } else if (targetType === 'SELECTIVE') {
+      if (!Array.isArray(selectedUserIds) || selectedUserIds.length === 0) {
+        return sendError(res, 'At least one student must be selected.', 400);
+      }
+      query._id = { $in: selectedUserIds };
+    }
+
+    const eligibleUsers = await User.find(query).select('email name studentId department').lean();
+    const validUsers = eligibleUsers.filter((u) => u.email && u.email.trim().length > 0);
+
+    if (validUsers.length === 0) {
+      return sendError(res, 'No eligible active recipients found for this broadcast target.', 400);
+    }
+
+    // Create initial BroadcastLog in database
+    const broadcastRecord = await BroadcastLog.create({
+      broadcastId: safeBroadcastId,
+      subject: subject.trim(),
+      title: title.trim(),
+      badgeText: badgeText ? badgeText.trim() : 'IIUC ANNOUNCEMENT',
+      announcementBody: announcementBody.trim(),
+      ctaUrl: ctaUrl ? ctaUrl.trim() : '',
+      ctaText: ctaText ? ctaText.trim() : 'Explore Upgrade',
+      targetType,
+      department: department ? department.trim() : '',
+      recipientCount: validUsers.length,
+      successCount: 0,
+      failedCount: 0,
+      status: 'SENDING',
+      createdBy: req.user._id,
+      createdByName: req.user.name || 'Administrator',
+      startedAt: new Date(),
+    });
+
+    // Controlled Batch Processing Constants
+    const BATCH_SIZE = 25;
+    const BATCH_DELAY_MS = 1000;
+
+    let successCount = 0;
+    let failedCount = 0;
+
+    for (let i = 0; i < validUsers.length; i += BATCH_SIZE) {
+      const batch = validUsers.slice(i, i + BATCH_SIZE);
+
+      const results = await Promise.allSettled(
+        batch.map((userItem) =>
+          sendAnnouncementEmail({
+            to: userItem.email,
+            subject: subject.trim(),
+            title: title.trim(),
+            badgeText: badgeText ? badgeText.trim() : 'IIUC ANNOUNCEMENT',
+            announcementBody: announcementBody.trim(),
+            ctaUrl,
+            ctaText,
+          })
+        )
+      );
+
+      for (const resItem of results) {
+        if (resItem.status === 'fulfilled') {
+          successCount++;
+        } else {
+          failedCount++;
+          console.warn('[Broadcast] Individual recipient send failed:', resItem.reason?.message || resItem.reason);
+        }
+      }
+
+      if (i + BATCH_SIZE < validUsers.length) {
+        await new Promise((resolve) => setTimeout(resolve, BATCH_DELAY_MS));
+      }
+    }
+
+    const finalStatus = failedCount > 0 ? 'COMPLETED_WITH_ERRORS' : 'COMPLETED';
+
+    broadcastRecord.successCount = successCount;
+    broadcastRecord.failedCount = failedCount;
+    broadcastRecord.status = finalStatus;
+    broadcastRecord.completedAt = new Date();
+    await broadcastRecord.save();
+
+    // Log admin audit activity
+    await logAdminActivity({
+      adminId: req.user._id,
+      adminName: req.user.name,
+      action: 'BROADCAST_EMAIL_SENT',
+      module: 'SYSTEM',
+      targetId: broadcastRecord._id.toString(),
+      targetName: safeBroadcastId,
+      description: `Sent email broadcast "${title}" to ${targetType} (${validUsers.length} total recipients). Success: ${successCount}, Failed: ${failedCount}.`,
+      meta: {
+        targetType,
+        department,
+        total: validUsers.length,
+        successful: successCount,
+        failed: failedCount,
+      },
+    });
+
+    return sendSuccess(res, 'Email broadcast process completed', {
+      broadcastId: safeBroadcastId,
+      status: finalStatus,
+      total: validUsers.length,
+      successful: successCount,
+      failed: failedCount,
+    });
+  } catch (error) {
+    console.error('[Broadcast Controller Error]:', error);
+    next(error);
+  }
+};
+
+export const getBroadcastLogs = async (req, res, next) => {
+  try {
+    const logs = await BroadcastLog.find()
+      .sort({ createdAt: -1 })
+      .limit(50)
+      .populate('createdBy', 'name email role')
+      .lean();
+
+    return sendSuccess(res, 'Broadcast logs retrieved', logs);
+  } catch (error) {
+    next(error);
+  }
+};
+

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, NavLink, Outlet, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, GraduationCap, BookOpen, FileText,
-  Activity, Settings, BarChart2, LogOut, Menu, X, ChevronRight, UserCheck, Shield, Building2, Layers
+  Activity, Settings, BarChart2, LogOut, Menu, X, ChevronRight, UserCheck, Shield, Building2, Layers, Mail
 } from 'lucide-react';
 import { useAuthStore } from '../../stores/useAuthStore';
 import { NotificationBell } from './notifications/NotificationBell';
@@ -30,6 +30,7 @@ const NAV_SECTIONS = [
   {
     heading: 'SYSTEM',
     items: [
+      { to: '/admin/broadcast', label: 'Email Broadcast', icon: Mail },
       { to: '/admin/analytics', label: 'Analytics',     icon: BarChart2 },
       { to: '/admin/activity',  label: 'Activity Logs', icon: Activity },
       { to: '/admin/profile',   label: 'Admin Profile', icon: Shield },

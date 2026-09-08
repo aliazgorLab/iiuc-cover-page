@@ -37,6 +37,7 @@ import CourseManagement from './features/admin/courses/CourseManagement';
 import DepartmentManagement from './features/admin/departments/DepartmentManagement';
 import TemplateManagement from './features/admin/templates/TemplateManagement';
 import LabTemplateManagement from './features/admin/lab-templates/LabTemplateManagement';
+import BroadcastManagement from './features/admin/broadcast/BroadcastManagement';
 import ActivityLog from './features/admin/ActivityLog';
 import AdminAnalytics from './features/admin/analytics/AdminAnalytics';
 import AdminSettings from './features/admin/settings/AdminSettings';
@@ -94,6 +95,7 @@ function App() {
             <Route path="lab-templates" element={<LabTemplateManagement />} />
             <Route path="departments" element={<DepartmentManagement />} />
             <Route path="templates" element={<TemplateManagement />} />
+            <Route path="broadcast" element={<BroadcastManagement />} />
             <Route path="analytics" element={<AdminAnalytics />} />
             <Route path="activity" element={<ActivityLog />} />
             <Route path="profile" element={<AdminProfile />} />

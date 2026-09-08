@@ -37,6 +37,7 @@ const adminActivitySchema = new mongoose.Schema(
         // System actions
         'SYSTEM_SETTINGS_CHANGED',
         'ADMIN_LOGIN',
+        'BROADCAST_EMAIL_SENT',
       ],
     },
     module: {
