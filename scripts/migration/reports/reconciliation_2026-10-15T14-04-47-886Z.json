@@ -1,0 +1,157 @@
+{
+  "executionTimestamp": "2026-10-15T14:04:47.332Z",
+  "dryRun": true,
+  "targetEnv": "staging",
+  "destinationProjectId": "DRY_RUN_NO_WRITES",
+  "backupSource": "E:/iiuc_backups/mongodb_atlas_backup/backup_2026-10-15T13-58-24-043Z",
+  "collections": {
+    "users": {
+      "sourceCount": 253,
+      "transformedCount": 253,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 1352,
+      "targetCollection": "users",
+      "batchesRequired": 1,
+      "errors": []
+    },
+    "covers": {
+      "sourceCount": 495,
+      "transformedCount": 495,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 1637,
+      "targetCollection": "covers",
+      "batchesRequired": 2,
+      "errors": []
+    },
+    "teachers": {
+      "sourceCount": 737,
+      "transformedCount": 737,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 775,
+      "targetCollection": "teachers",
+      "batchesRequired": 2,
+      "errors": []
+    },
+    "courses": {
+      "sourceCount": 571,
+      "transformedCount": 571,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 652,
+      "targetCollection": "courses",
+      "batchesRequired": 2,
+      "errors": []
+    },
+    "draftcovers": {
+      "sourceCount": 200,
+      "transformedCount": 200,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 1426,
+      "targetCollection": "drafts",
+      "batchesRequired": 1,
+      "errors": []
+    },
+    "usersessions": {
+      "sourceCount": 610,
+      "transformedCount": 610,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 952,
+      "targetCollection": "userSessions",
+      "batchesRequired": 2,
+      "errors": []
+    },
+    "adminnotifications": {
+      "sourceCount": 253,
+      "transformedCount": 253,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 544,
+      "targetCollection": "adminNotifications",
+      "batchesRequired": 1,
+      "errors": []
+    },
+    "labindexrecords": {
+      "sourceCount": 12,
+      "transformedCount": 12,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 2095,
+      "targetCollection": "labIndexRecords",
+      "batchesRequired": 1,
+      "errors": []
+    },
+    "templates": {
+      "sourceCount": 4,
+      "transformedCount": 4,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 640,
+      "targetCollection": "templates",
+      "batchesRequired": 1,
+      "errors": []
+    },
+    "adminactivities": {
+      "sourceCount": 3,
+      "transformedCount": 3,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 759,
+      "targetCollection": "adminActivities",
+      "batchesRequired": 1,
+      "errors": []
+    },
+    "teacherimportlogs": {
+      "sourceCount": 2,
+      "transformedCount": 2,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 1740,
+      "targetCollection": "teacherImportLogs",
+      "batchesRequired": 1,
+      "errors": []
+    },
+    "broadcastlogs": {
+      "sourceCount": 1,
+      "transformedCount": 1,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 1406,
+      "targetCollection": "broadcastLogs",
+      "batchesRequired": 1,
+      "errors": []
+    },
+    "departments": {
+      "sourceCount": 1,
+      "transformedCount": 1,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 494,
+      "targetCollection": "departments",
+      "batchesRequired": 1,
+      "errors": []
+    },
+    "labexperiments": {
+      "sourceCount": 0,
+      "transformedCount": 0,
+      "skippedCount": 0,
+      "failedCount": 0,
+      "maxDocBytes": 0,
+      "targetCollection": "labexperiments",
+      "batchesRequired": 1,
+      "errors": []
+    }
+  },
+  "totalSourceDocs": 3142,
+  "totalTransformedDocs": 3142,
+  "totalSkippedDocs": 0,
+  "totalFailedDocs": 0,
+  "sizeViolations": 0,
+  "foreignKeyViolations": 0,
+  "executionDurationMs": 262,
+  "status": "DRY_RUN_PASSED"
+}
