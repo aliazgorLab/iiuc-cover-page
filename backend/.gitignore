@@ -14,10 +14,27 @@ node_modules/
 
 # Environment files
 .env
+.env.*
 .env.local
 .env.development
 .env.test
 .env.production
+!.env.example
+
+# Credentials & Service Accounts (Never commit)
+*serviceAccountKey*.json
+*service-account*.json
+*firebase-adminsdk*.json
+*.pem
+*.key
+credentials.json
+
+# Database Backups & Exports
+dump/
+backups/
+*.dump
+*.bson
+migration_backups/
 
 # IDE & OS files
 .DS_Store
