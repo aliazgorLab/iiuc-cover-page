@@ -33,6 +33,7 @@ backups/
 *.tar.gz
 migration_backups/
 export_data/
+scripts/migration/reports/reconciliation_20*.json
 
 # Editor directories and files
 .vscode/*

@@ -1,7 +1,7 @@
 /**
  * IIUC Cover Page Platform — MongoDB to Cloud Firestore Migration Engine
  *
- * Phase 3B: Idempotent, Resumable, Dry-Run-First Data Transformation Tool
+ * Phase 3C: Local Firestore Emulator Import, Idempotency & Verification Engine
  *
  * SAFETY INVARIANTS:
  * 1. Default execution mode is STRICT DRY-RUN (--dry-run). No writes occur unless explicitly specified.
@@ -9,12 +9,14 @@
  * 3. Fails closed if target is ambiguous or if production writes are attempted without authorization.
  * 4. Deterministic document IDs preserve legacy MongoDB _id across all collections.
  * 5. All BSON types (ObjectId, Date, nested Mixed) are safely mapped with zero silent field loss.
+ * 6. Cloud Firestore writes are strictly blocked; emulator import runs against verified in-memory emulator.
  */
 
 import fs from 'fs';
 import path from 'path';
 import crypto from 'crypto';
 import { createRequire } from 'module';
+import { LocalFirestoreEmulator } from './local_firestore_emulator.mjs';
 
 const require = createRequire('e:/Cover design web/iiuc-cover-page/backend/src/server.js');
 const mongoose = require('mongoose');
@@ -30,7 +32,7 @@ export const MIGRATION_CONFIG = {
   batchSize: 400, // Safe chunk under Firestore 500-operation transaction limit
   maxFirestoreDocBytes: 1048576, // 1 MiB limit
   productionProjectId: 'iiuccoverpage-8edd3',
-  allowedStagingProjects: ['iiuc-cover-page-staging', 'iiuccoverpage-staging', 'emulator'],
+  allowedStagingProjects: ['iiuc-cover-page-staging', 'iiuccoverpage-staging', 'emulator', 'iiuc-cover-page-emulator'],
 };
 
 export const COLLECTION_MAP = {
@@ -54,13 +56,6 @@ export const COLLECTION_MAP = {
 // SAFE TYPE CONVERTER & NORMALIZER
 // ─────────────────────────────────────────────────────────────────────────────
 
-/**
- * Recursively converts MongoDB/BSON types into Firestore-compatible JavaScript objects.
- * - ObjectId -> String (24-char hex)
- * - Date -> ISO string and millisecond timestamp (safe for Firestore Timestamp creation)
- * - Numbers, booleans, arrays, maps preserved exactly
- * - No fields are discarded. __v is stored as legacySchemaVersion
- */
 export function bsonToFirestore(val) {
   if (val === null || val === undefined) {
     return null;
@@ -105,10 +100,7 @@ export function bsonToFirestore(val) {
   return val;
 }
 
-/**
- * Transforms a single MongoDB document into a normalized Firestore document.
- */
-export function transformDocument(sourceCollection, doc) {
+export function transformDocument(sourceCollection, doc, options = {}) {
   const mapping = COLLECTION_MAP[sourceCollection];
   if (!mapping) {
     throw new Error(`Unmapped source collection: ${sourceCollection}`);
@@ -121,10 +113,11 @@ export function transformDocument(sourceCollection, doc) {
   // Normalize document ID: use deterministic legacy MongoDB ID
   const destId = legacyId;
 
-  // Enforce metadata tags
+  // Enforce metadata tags with deterministic timestamp
+  const migrationTimestamp = options.migrationTimestamp || '2026-10-15T13:58:24.046Z';
   converted.id = destId;
   converted.legacyMongoId = legacyId;
-  converted._migratedAt = new Date().toISOString();
+  converted._migratedAt = migrationTimestamp;
   converted._migrationSource = 'mongodb_atlas_backup';
 
   // Normalize foreign keys if applicable
@@ -135,7 +128,6 @@ export function transformDocument(sourceCollection, doc) {
 
   // Specific user security handling
   if (sourceCollection === 'users') {
-    // Preserve passwordHash field as empty string or legacy note (never expose)
     if (converted.passwordHash) {
       converted._hasLegacyPasswordHash = true;
       delete converted.passwordHash;
@@ -146,7 +138,7 @@ export function transformDocument(sourceCollection, doc) {
     delete converted.refreshToken; // Force fresh session on cutover
     delete converted.verificationToken;
 
-    // Dual-Key Identity Mapping Tag
+    // Dual-Key Identity Mapping Tag (Never auto-link on email alone)
     converted._identityVerification = {
       provider: converted.provider || 'google',
       googleSubjectId: converted.googleId || '',
@@ -169,30 +161,34 @@ export function transformDocument(sourceCollection, doc) {
 
 export async function runMigrationEngine({
   backupDir = MIGRATION_CONFIG.defaultBackupDir,
-  targetEnv = 'staging',
+  targetEnv = 'emulator',
   dryRun = true,
   destinationProjectId = null,
+  emulatorInstance = null,
+  maxRetries = 2,
+  failFast = true,
 } = {}) {
   const startTime = Date.now();
   console.log('======================================================================');
   console.log('  IIUC Cover Page Platform — MongoDB to Cloud Firestore Migration Engine');
   console.log('======================================================================');
   console.log(`[Config] Backup Directory:       ${backupDir}`);
-  console.log(`[Config] Execution Mode:          ${dryRun ? 'STRICT DRY-RUN (Validation & Transformation Only)' : 'LIVE STAGING WRITES'}`);
+  console.log(`[Config] Execution Mode:          ${dryRun ? 'STRICT DRY-RUN (Validation & Transformation Only)' : 'EMULATOR IMPORT COMMIT'}`);
   console.log(`[Config] Target Environment:     ${targetEnv.toUpperCase()}`);
-  console.log(`[Config] Destination Project:    ${destinationProjectId || 'NONE (Dry-run mode)'}`);
+  console.log(`[Config] Destination Project:    ${destinationProjectId || (targetEnv === 'emulator' ? 'iiuc-cover-page-emulator' : 'NONE')}`);
   console.log('----------------------------------------------------------------------');
 
   // FAIL-CLOSED SAFETY GATES
   if (!dryRun) {
-    if (!destinationProjectId) {
+    const effectiveProject = destinationProjectId || (targetEnv === 'emulator' ? 'iiuc-cover-page-emulator' : null);
+    if (!effectiveProject) {
       throw new Error('[SAFETY CRITICAL] Cannot perform live writes: destinationProjectId is required.');
     }
-    if (destinationProjectId === MIGRATION_CONFIG.productionProjectId) {
-      throw new Error('[SAFETY CRITICAL] REFUSING TO WRITE TO PRODUCTION PROJECT (iiuccoverpage-8edd3) DURING PHASE 3B!');
+    if (effectiveProject === MIGRATION_CONFIG.productionProjectId) {
+      throw new Error('[SAFETY CRITICAL] REFUSING TO WRITE TO PRODUCTION PROJECT (iiuccoverpage-8edd3) DURING PHASE 3C!');
     }
-    if (!MIGRATION_CONFIG.allowedStagingProjects.includes(destinationProjectId)) {
-      throw new Error(`[SAFETY CRITICAL] Destination project "${destinationProjectId}" is not recognized as an approved staging destination.`);
+    if (!MIGRATION_CONFIG.allowedStagingProjects.includes(effectiveProject)) {
+      throw new Error(`[SAFETY CRITICAL] Destination project "${effectiveProject}" is not recognized as an approved staging/emulator destination.`);
     }
   }
 
@@ -211,13 +207,17 @@ export async function runMigrationEngine({
     executionTimestamp: new Date().toISOString(),
     dryRun,
     targetEnv,
-    destinationProjectId: dryRun ? 'DRY_RUN_NO_WRITES' : destinationProjectId,
+    destinationProjectId: dryRun ? 'DRY_RUN_NO_WRITES' : (destinationProjectId || 'iiuc-cover-page-emulator'),
     backupSource: backupDir,
     collections: {},
     totalSourceDocs: 0,
     totalTransformedDocs: 0,
+    totalImportedDocs: 0,
     totalSkippedDocs: 0,
     totalFailedDocs: 0,
+    idempotentCreated: 0,
+    idempotentUpdated: 0,
+    idempotentUnchanged: 0,
     sizeViolations: 0,
     foreignKeyViolations: 0,
     executionDurationMs: 0,
@@ -240,6 +240,10 @@ export async function runMigrationEngine({
     reconciliation.collections[sourceCol] = {
       sourceCount: sourceDocs.length,
       transformedCount: 0,
+      importedCount: 0,
+      createdCount: 0,
+      updatedCount: 0,
+      unchangedCount: 0,
       skippedCount: 0,
       failedCount: 0,
       maxDocBytes: 0,
@@ -256,7 +260,9 @@ export async function runMigrationEngine({
     for (let i = 0; i < sourceDocs.length; i++) {
       const doc = sourceDocs[i];
       try {
-        const transformed = transformDocument(sourceCol, doc);
+        const transformed = transformDocument(sourceCol, doc, {
+          migrationTimestamp: manifest.backupTimestamp,
+        });
 
         // Check duplicate IDs within collection
         if (seenIds.has(transformed.destId)) {
@@ -327,10 +333,86 @@ export async function runMigrationEngine({
     console.error(`  ✗ Detected ${reconciliation.foreignKeyViolations} foreign key violations!`);
   }
 
-  // Phase 3: Live write execution (STAGING ONLY)
+  // Phase 3: Emulator Import Commit Execution
+  const emulator = emulatorInstance || (targetEnv === 'emulator' ? new LocalFirestoreEmulator('iiuc-cover-page-emulator') : null);
+
   if (!dryRun) {
-    console.log('\n[Live Write] Initiating staging commit batches...');
-    // Handled in authorized Phase 3C staging test
+    if (!emulator) {
+      throw new Error('[SAFETY CRITICAL] Local Firestore Emulator instance required for non-dry-run import.');
+    }
+
+    console.log('\n[Emulator Import] Committing atomic batches to isolated Firestore Emulator...');
+    for (const [sourceCol, transformedList] of Object.entries(allTransformedDocs)) {
+      const colStats = reconciliation.collections[sourceCol];
+      const targetCol = colStats.targetCollection;
+
+      if (transformedList.length === 0) {
+        continue;
+      }
+
+      // Chunk into batches of <= 400 operations
+      for (let b = 0; b < transformedList.length; b += MIGRATION_CONFIG.batchSize) {
+        const chunk = transformedList.slice(b, b + MIGRATION_CONFIG.batchSize);
+        const batchOps = chunk.map((item) => ({
+          type: 'set',
+          collection: targetCol,
+          id: item.destId,
+          data: item.data,
+        }));
+
+        let attempt = 0;
+        let batchSuccess = false;
+        let lastError = null;
+
+        while (attempt <= maxRetries && !batchSuccess) {
+          try {
+            attempt++;
+            const results = await emulator.commitBatch(batchOps);
+            batchSuccess = true;
+
+            for (const res of results) {
+              if (res.created) {
+                colStats.createdCount++;
+                reconciliation.idempotentCreated++;
+              } else if (res.updated) {
+                colStats.updatedCount++;
+                reconciliation.idempotentUpdated++;
+              } else if (res.unchanged) {
+                colStats.unchangedCount++;
+                reconciliation.idempotentUnchanged++;
+              }
+            }
+          } catch (batchErr) {
+            lastError = batchErr;
+            if (attempt <= maxRetries) {
+              console.warn(`  ⚠ Batch retry [${attempt}/${maxRetries}] for ${targetCol}: ${batchErr.message}`);
+            }
+          }
+        }
+
+        if (!batchSuccess) {
+          colStats.failedCount += chunk.length;
+          reconciliation.totalFailedDocs += chunk.length;
+          colStats.errors.push({
+            batchStart: b,
+            batchSize: chunk.length,
+            error: lastError ? lastError.message : 'Unknown batch error',
+          });
+          if (failFast) {
+            throw new Error(`[BATCH_FAILURE_HALT] Batch commit failed for collection "${targetCol}" at offset ${b}: ${lastError ? lastError.message : 'Unknown error'}`);
+          }
+        }
+      }
+
+      colStats.importedCount = emulator.countDocuments(targetCol);
+      reconciliation.totalImportedDocs += colStats.importedCount;
+
+      const flag = colStats.importedCount === colStats.sourceCount ? '✓' : '✗';
+      console.log(
+        `  ${flag} Imported into ${targetCol.padEnd(20)}: ${String(colStats.importedCount).padStart(5)} docs | ` +
+        `Created: ${colStats.createdCount} | Updated: ${colStats.updatedCount} | Unchanged: ${colStats.unchangedCount}`
+      );
+    }
   } else {
     console.log('\n[Safety] Dry-run mode completed. ZERO writes performed to any database.');
   }
@@ -339,9 +421,10 @@ export async function runMigrationEngine({
   const isAllClean = reconciliation.totalFailedDocs === 0 &&
                      reconciliation.sizeViolations === 0 &&
                      reconciliation.foreignKeyViolations === 0 &&
-                     reconciliation.totalSourceDocs === reconciliation.totalTransformedDocs;
+                     (dryRun ? reconciliation.totalSourceDocs === reconciliation.totalTransformedDocs
+                             : reconciliation.totalSourceDocs === reconciliation.totalImportedDocs);
 
-  reconciliation.status = isAllClean ? 'DRY_RUN_PASSED' : 'DRY_RUN_FAILED';
+  reconciliation.status = isAllClean ? (dryRun ? 'DRY_RUN_PASSED' : 'EMULATOR_IMPORT_PASSED') : 'MIGRATION_FAILED';
 
   // Save detailed reconciliation report
   fs.mkdirSync(MIGRATION_CONFIG.reportsDir, { recursive: true });
@@ -353,6 +436,12 @@ export async function runMigrationEngine({
 
   console.log('----------------------------------------------------------------------');
   console.log(`[Summary] Total Transformed:     ${reconciliation.totalTransformedDocs} / ${reconciliation.totalSourceDocs}`);
+  if (!dryRun) {
+    console.log(`[Summary] Total Imported:        ${reconciliation.totalImportedDocs} / ${reconciliation.totalSourceDocs}`);
+    console.log(`[Summary] Idempotent Created:    ${reconciliation.idempotentCreated}`);
+    console.log(`[Summary] Idempotent Unchanged:  ${reconciliation.idempotentUnchanged}`);
+    console.log(`[Summary] Idempotent Updated:    ${reconciliation.idempotentUpdated}`);
+  }
   console.log(`[Summary] Failed Records:        ${reconciliation.totalFailedDocs}`);
   console.log(`[Summary] Size Violations:       ${reconciliation.sizeViolations}`);
   console.log(`[Summary] Relationship Errors:   ${reconciliation.foreignKeyViolations}`);
@@ -360,14 +449,14 @@ export async function runMigrationEngine({
   console.log(`[Report] Saved Report:           ${reportPath}`);
   console.log('======================================================================\n');
 
-  return reconciliation;
+  return { reconciliation, emulator };
 }
 
 // CLI entry point
 if (process.argv[1] && process.argv[1].endsWith('migrate.mjs')) {
   const isCommit = process.argv.includes('--commit');
-  const targetEnv = process.argv.includes('--target=staging') ? 'staging' : 'dryrun';
-  const destProject = process.env.STAGING_PROJECT_ID || null;
+  const targetEnv = process.argv.includes('--target=staging') ? 'staging' : 'emulator';
+  const destProject = process.env.STAGING_PROJECT_ID || 'iiuc-cover-page-emulator';
 
   runMigrationEngine({
     dryRun: !isCommit,

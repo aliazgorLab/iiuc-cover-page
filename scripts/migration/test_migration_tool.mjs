@@ -36,7 +36,7 @@ async function runTests() {
   // TEST 1: Fail-Closed Safety Gate — Reject live writes without target project
   // ─────────────────────────────────────────────────────────────────────────
   try {
-    await runMigrationEngine({ dryRun: false, destinationProjectId: null });
+    await runMigrationEngine({ dryRun: false, targetEnv: 'staging', destinationProjectId: null });
     assert(false, 'Safety Gate: Should reject live write without destination project');
   } catch (err) {
     assert(
@@ -116,7 +116,7 @@ async function runTests() {
   // TEST 5: Full Dry-Run Execution against Verified Backup
   // ─────────────────────────────────────────────────────────────────────────
   console.log('\n[Execution] Running full dry-run transformation against verified backup...');
-  const result = await runMigrationEngine({ dryRun: true });
+  const { reconciliation: result } = await runMigrationEngine({ dryRun: true });
 
   assert(result.status === 'DRY_RUN_PASSED', 'Full Dry-Run: Status is DRY_RUN_PASSED');
   assert(result.totalSourceDocs === 3142, 'Count Reconciliation: 3,142 total source documents parsed');
