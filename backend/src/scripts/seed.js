@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
+import { checkDatabaseIsolation, extractDatabaseName } from '../config/validateEnv.js';
 import Teacher from '../models/Teacher.js';
 import Course from '../models/Course.js';
 import Department from '../models/Department.js';
@@ -10,9 +11,20 @@ dotenv.config();
 
 const seedDB = async () => {
   try {
-    const mongoUri = process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/iiuc_cover_page';
-    console.log(`Connecting to MongoDB for seeding: ${mongoUri}...`);
-    await mongoose.connect(mongoUri);
+    const isolation = checkDatabaseIsolation(process.env);
+    if (!isolation.valid) {
+      console.error(`[CRITICAL REFUSAL] Seeding halted by database isolation gate: ${isolation.error}`);
+      process.exit(1);
+    }
+
+    const rawUri = process.env.MONGODB_URI || process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/iiuc_cover_page';
+    const nodeEnv = (process.env.NODE_ENV || '').toLowerCase().trim();
+    const appEnv = (process.env.APP_ENV || '').toLowerCase().trim();
+    const isStaging = nodeEnv === 'staging' || appEnv === 'staging';
+    const targetDb = isStaging ? 'iiuc_cover_page_staging' : (extractDatabaseName(rawUri) || 'iiuc_cover_page');
+
+    console.log(`Connecting to MongoDB for seeding (target db: ${targetDb})...`);
+    await mongoose.connect(rawUri, { dbName: targetDb });
 
     console.log('Clearing existing teachers, courses, and departments...');
     await Teacher.deleteMany({});

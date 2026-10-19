@@ -11,6 +11,8 @@
  *   logger.error('MongoDB connection failed', err);
  */
 
+import { redactSensitiveData, sanitizeString } from './sanitize.js';
+
 const isDev = (process.env.NODE_ENV || 'development') !== 'production';
 
 const LEVELS = {
@@ -26,18 +28,20 @@ const formatTimestamp = () => new Date().toISOString();
 
 const log = (level, message, meta) => {
   const ts = formatTimestamp();
-  const { label, color } = LEVELS[level];
+  const { label, color } = LEVELS[level] || LEVELS.info;
+  const safeMessage = typeof message === 'string' ? sanitizeString(message) : redactSensitiveData(message);
+  const safeMeta = meta !== undefined ? redactSensitiveData(meta) : undefined;
 
   if (isDev) {
     const prefix = `${color}[${label}]${RESET} ${ts}`;
-    if (meta) {
-      console.log(`${prefix} ${message}`, meta);
+    if (safeMeta) {
+      console.log(`${prefix} ${safeMessage}`, safeMeta);
     } else {
-      console.log(`${prefix} ${message}`);
+      console.log(`${prefix} ${safeMessage}`);
     }
   } else {
     // Production: structured JSON for log aggregation (e.g., Datadog, Papertrail)
-    const entry = { level, timestamp: ts, message, ...(meta ? { meta } : {}) };
+    const entry = { level, timestamp: ts, message: safeMessage, ...(safeMeta ? { meta: safeMeta } : {}) };
     console.log(JSON.stringify(entry));
   }
 };

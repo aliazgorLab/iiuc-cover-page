@@ -17,6 +17,24 @@ dist-ssr
 .env.*
 !.env.example
 
+# Credentials & Service Accounts (Never commit)
+*serviceAccountKey*.json
+*service-account*.json
+*firebase-adminsdk*.json
+*.pem
+*.key
+credentials.json
+
+# Database Exports & Backups (Keep outside repository)
+dump/
+backups/
+*.dump
+*.bson
+*.tar.gz
+migration_backups/
+export_data/
+scripts/migration/reports/reconciliation_20*.json
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
@@ -27,3 +45,4 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+

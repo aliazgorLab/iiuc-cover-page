@@ -37,9 +37,11 @@ validateEnv();
 const app = express();
 const DEFAULT_PORT = parseInt(process.env.PORT || '5000', 10);
 
-// Connect Database & Verify SMTP Health
-connectDB();
-verifySmtpConnection();
+// Connect Database & Verify SMTP Health (skipped in test mode)
+if (process.env.NODE_ENV !== 'test') {
+  connectDB();
+  verifySmtpConnection();
+}
 
 // Security & Optimization Middleware Audit
 app.use(requestIdMiddleware);
@@ -53,23 +55,12 @@ if (process.env.NODE_ENV === 'production') {
   app.use(morgan('dev'));
 }
 
-// Global CORS Setup
-const allowedOrigins = [
-  process.env.FRONTEND_URL,
-  'http://localhost:5173',
-  'http://localhost:3000',
-].filter(Boolean);
+import { getAllowedOrigins, corsOriginValidator } from './config/corsConfig.js';
+export { getAllowedOrigins, corsOriginValidator };
 
 app.use(
   cors({
-    origin: (origin, callback) => {
-      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server) or allowed origins
-      if (!origin || allowedOrigins.includes(origin) || process.env.NODE_ENV !== 'production') {
-        callback(null, true);
-      } else {
-        callback(null, true);
-      }
-    },
+    origin: (origin, callback) => corsOriginValidator(origin, callback),
     credentials: true,
   })
 );
@@ -127,6 +118,8 @@ const startServer = (port) => {
   });
 };
 
-startServer(DEFAULT_PORT);
+if (process.env.NODE_ENV !== 'test') {
+  startServer(DEFAULT_PORT);
+}
 
 export default app;

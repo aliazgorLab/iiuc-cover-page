@@ -16,10 +16,19 @@ dist-ssr/
 
 # Environment files
 .env
+.env.*
 .env.local
 .env.development.local
 .env.test.local
 .env.production.local
+!.env.example
+
+# Credentials & Service Accounts (Never commit)
+*serviceAccountKey*.json
+*service-account*.json
+*firebase-adminsdk*.json
+*.pem
+*.key
 
 # IDE & OS files
 .DS_Store

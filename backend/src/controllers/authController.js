@@ -57,6 +57,9 @@ export const googleAuth = async (req, res, next) => {
     let avatar = '';
     let googleId = '';
 
+    const isProduction = process.env.NODE_ENV === 'production';
+    const allowDevMock = !isProduction && process.env.DEV_ALLOW_MOCK_GOOGLE_AUTH === 'true';
+
     if (credential) {
       try {
         const ticket = await client.verifyIdToken({
@@ -64,29 +67,43 @@ export const googleAuth = async (req, res, next) => {
           audience: process.env.GOOGLE_CLIENT_ID,
         });
         const payload = ticket.getPayload();
+        if (!payload || !payload.email) {
+          return sendError(res, 'Google authentication failed: Missing email address in verified token payload.', 401);
+        }
         email = payload.email;
         name = payload.name;
         avatar = payload.picture;
         googleId = payload.sub;
       } catch (err) {
-        console.warn('Google OAuth token verification failed, trying JWT decode fallback:', err.message);
+        if (!allowDevMock) {
+          console.error('Google OAuth token verification failed:', err.message);
+          return sendError(res, 'Google authentication failed: Invalid or unverified ID token signature.', 401);
+        }
+
+        console.warn('[DEV ONLY] Google OAuth token verification failed, using dev fallback:', err.message);
         try {
           const decoded = jwt.decode(credential);
           if (decoded && decoded.email) {
             email = decoded.email;
             name = decoded.name || decoded.email.split('@')[0];
             avatar = decoded.picture || '';
-            googleId = decoded.sub || 'google-' + Date.now();
+            googleId = decoded.sub || 'dev-google-' + Date.now();
           }
         } catch (decodeErr) {
-          console.error('JWT decode fallback error:', decodeErr.message);
+          console.error('[DEV ONLY] JWT decode fallback error:', decodeErr.message);
+        }
+
+        if (!email) {
+          return sendError(res, 'Google authentication failed: Invalid token format.', 401);
         }
       }
-    } else if (userInfo && userInfo.email) {
+    } else if (allowDevMock && userInfo && userInfo.email) {
       email = userInfo.email;
       name = userInfo.name || userInfo.email.split('@')[0];
       avatar = userInfo.picture || '';
-      googleId = userInfo.sub || 'google-' + Date.now();
+      googleId = userInfo.sub || 'dev-google-' + Date.now();
+    } else {
+      return sendError(res, 'Google authentication failed: Verified Google ID token credential is required.', 400);
     }
 
     if (!email) {

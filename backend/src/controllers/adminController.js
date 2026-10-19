@@ -165,14 +165,27 @@ export const updateStudentStatus = async (req, res, next) => {
 
     if (!user) return sendError(res, 'Student not found', 404);
 
+    const callerRole = (req.user?.role || '').toUpperCase();
     const changes = [];
 
     if (accountStatus && ['ACTIVE', 'SUSPENDED', 'BLOCKED'].includes(accountStatus)) {
+      // Disallow non-SUPER_ADMIN from modifying status of a SUPER_ADMIN
+      if (user.role === 'SUPER_ADMIN' && callerRole !== 'SUPER_ADMIN') {
+        return sendError(res, 'Access denied: Only a SUPER_ADMIN can modify a SUPER_ADMIN account status.', 403);
+      }
       changes.push(`Account status: ${user.accountStatus} → ${accountStatus}`);
       user.accountStatus = accountStatus;
     }
 
     if (role && ['STUDENT', 'ADMIN', 'SUPER_ADMIN', 'MODERATOR'].includes(role)) {
+      // Strict rule: Only a SUPER_ADMIN can promote any user to SUPER_ADMIN
+      if (role === 'SUPER_ADMIN' && callerRole !== 'SUPER_ADMIN') {
+        return sendError(res, 'Access denied: Only a SUPER_ADMIN can promote a user to SUPER_ADMIN.', 403);
+      }
+      // Strict rule: Only a SUPER_ADMIN can modify an existing SUPER_ADMIN account
+      if (user.role === 'SUPER_ADMIN' && callerRole !== 'SUPER_ADMIN') {
+        return sendError(res, 'Access denied: Only a SUPER_ADMIN can modify a SUPER_ADMIN account role.', 403);
+      }
       changes.push(`Role: ${user.role} → ${role}`);
       user.role = role;
     }
@@ -223,8 +236,16 @@ export const bulkUpdateStudentStatus = async (req, res, next) => {
       return sendError(res, 'Valid accountStatus (ACTIVE, SUSPENDED, BLOCKED) is required', 400);
     }
 
+    const callerRole = (req.user?.role || '').toUpperCase();
+    const filter = { _id: { $in: ids } };
+
+    // Prevent non-SUPER_ADMIN from bulk-modifying any SUPER_ADMIN account
+    if (callerRole !== 'SUPER_ADMIN') {
+      filter.role = { $ne: 'SUPER_ADMIN' };
+    }
+
     const result = await User.updateMany(
-      { _id: { $in: ids } },
+      filter,
       { $set: { accountStatus } }
     );
 

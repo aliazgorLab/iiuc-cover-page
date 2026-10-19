@@ -3,10 +3,18 @@ import { sendError } from '../utils/response.js';
 export const validateGoogleAuthPayload = (req, res, next) => {
   const { credential, userInfo } = req.body;
   const hasCredential = credential && typeof credential === 'string' && credential.trim() !== '';
-  const hasUserInfo = userInfo && typeof userInfo === 'object' && Boolean(userInfo.email);
-  
-  if (!hasCredential && !hasUserInfo) {
-    return sendError(res, 'Google authentication payload (credential token or userInfo) is required.', 400);
+  const isProduction = process.env.NODE_ENV === 'production';
+  const allowDevMock = !isProduction && process.env.DEV_ALLOW_MOCK_GOOGLE_AUTH === 'true';
+
+  if (isProduction || !allowDevMock) {
+    if (!hasCredential) {
+      return sendError(res, 'Google authentication failed: ID token credential is required.', 400);
+    }
+  } else {
+    const hasUserInfo = userInfo && typeof userInfo === 'object' && Boolean(userInfo.email);
+    if (!hasCredential && !hasUserInfo) {
+      return sendError(res, 'Google authentication payload (credential token or userInfo) is required.', 400);
+    }
   }
   next();
 };

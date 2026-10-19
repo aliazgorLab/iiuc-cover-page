@@ -14,21 +14,39 @@ try {
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import { validateEnv, extractDatabaseName } from './validateEnv.js';
+
 // Explicitly load .env from backend root directory
 dotenv.config({ path: path.resolve(__dirname, '../../.env') });
 
+export const getTargetDatabaseName = (uri = '', env = process.env) => {
+  const nodeEnv = (env.NODE_ENV || '').toLowerCase().trim();
+  const appEnv = (env.APP_ENV || '').toLowerCase().trim();
+  const isStaging = nodeEnv === 'staging' || appEnv === 'staging';
+  const extracted = extractDatabaseName(uri);
+
+  if (isStaging) {
+    return extracted || 'iiuc_cover_page_staging';
+  }
+
+  return extracted || 'iiuc_cover_page';
+};
+
 export const connectDB = async () => {
+  validateEnv();
+
   const rawUri = process.env.MONGODB_URI || process.env.MONGO_URI;
   if (!rawUri) {
     throw new Error('MONGODB_URI is missing in environment configuration.');
   }
 
+  const targetDbName = getTargetDatabaseName(rawUri, process.env);
   const maskedUri = rawUri.replace(/:([^@]+)@/, ':****@');
 
   try {
-    console.log(`Connecting to MongoDB Atlas (${maskedUri})...`);
+    console.log(`Connecting to MongoDB Atlas (${maskedUri}) [dbName: ${targetDbName}]...`);
     const conn = await mongoose.connect(rawUri, {
-      dbName: 'iiuc_cover_page',
+      dbName: targetDbName,
       serverSelectionTimeoutMS: 10000,
     });
 
