@@ -404,7 +404,7 @@ export async function runMigrationEngine({
         }
       }
 
-      colStats.importedCount = emulator.countDocuments(targetCol);
+      colStats.importedCount = await emulator.countDocuments(targetCol);
       reconciliation.totalImportedDocs += colStats.importedCount;
 
       const flag = colStats.importedCount === colStats.sourceCount ? '✓' : '✗';

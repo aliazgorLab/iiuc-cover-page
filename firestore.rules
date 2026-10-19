@@ -4,14 +4,14 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     // =========================================================================
-    // IIUC Cover Page Platform — Production Firestore Security Rules
-    // Principle of Least Privilege: Deny by default. Strictly enforce ownership
-    // and academic domain verification.
+    // IIUC Cover Page Platform — Firestore Security Rules
+    // Principle of Least Privilege: Deny by default. Strictly enforce ownership,
+    // institutional identity verification, and role-based administration.
     // =========================================================================
 
     // Global default fallback: Deny all unhandled operations
     match /{document=**} {
-      allow read, write: false;
+      allow read, write: if false;
     }
 
     // ─────────────────────────────────────────────────────────────────────────
@@ -23,39 +23,45 @@ service cloud.firestore {
     }
 
     function isOwner(userId) {
-      return isSignedIn() && request.auth.uid == userId;
+      return isSignedIn() && (
+        request.auth.uid == userId ||
+        ('mongoId' in request.auth.token && request.auth.token.mongoId == userId)
+      );
     }
 
     function isAdmin() {
-      return isSignedIn() && (
-        request.auth.token.role == 'ADMIN' ||
-        request.auth.token.role == 'SUPER_ADMIN' ||
-        request.auth.token.role == 'MODERATOR'
-      );
+      return isSignedIn() &&
+        'role' in request.auth.token && (
+          request.auth.token.role == 'ADMIN' ||
+          request.auth.token.role == 'SUPER_ADMIN' ||
+          request.auth.token.role == 'MODERATOR'
+        );
     }
 
     function isAcademicEmail() {
-      return isSignedIn() && (
-        request.auth.token.email.matches('.*@ugrad\\.iiuc\\.ac\\.bd$') ||
-        request.auth.token.email.matches('.*@student\\.iiuc\\.ac\\.bd$') ||
-        request.auth.token.email.matches('.*@iiuc\\.ac\\.bd$')
-      );
+      return isSignedIn() &&
+        ('email_verified' in request.auth.token && request.auth.token.email_verified == true) && (
+          request.auth.token.email.matches('.*@ugrad\\.iiuc\\.ac\\.bd$') ||
+          request.auth.token.email.matches('.*@student\\.iiuc\\.ac\\.bd$') ||
+          request.auth.token.email.matches('.*@iiuc\\.ac\\.bd$')
+        );
     }
 
     // ─────────────────────────────────────────────────────────────────────────
     // User Profiles (`users/{userId}`)
     // ─────────────────────────────────────────────────────────────────────────
     match /users/{userId} {
-      // Students can only read their own profile; Admins can read all for intelligence
+      // Students can only read their own profile; Admins can read all for governance
       allow read: if isOwner(userId) || isAdmin();
 
       // Creation is allowed if authenticated student matches document ID & verified domain
       allow create: if isOwner(userId) && isAcademicEmail() &&
-        // Prevent student self-assigning admin roles or unverified status
+        // Prevent student self-assigning admin roles, permissions, or unverified status
         (!('role' in request.resource.data) || request.resource.data.role == 'STUDENT') &&
-        (!('accountStatus' in request.resource.data) || request.resource.data.accountStatus == 'ACTIVE');
+        (!('accountStatus' in request.resource.data) || request.resource.data.accountStatus == 'ACTIVE') &&
+        (!('permissions' in request.resource.data) || request.resource.data.permissions.size() == 0);
 
-      // Update: Students can edit academic info (dept, batch, etc.) but cannot elevate role
+      // Update: Students can edit academic info (dept, batch, etc.) but cannot elevate role/permissions
       allow update: if isOwner(userId) &&
         request.resource.data.diff(resource.data).affectedKeys()
           .hasOnly(['name', 'studentId', 'department', 'batch', 'semester', 'section', 'academicProfile', 'academicInfo', 'avatar', 'updatedAt'])
@@ -72,12 +78,13 @@ service cloud.firestore {
       // Owner can view their own covers; Admins can view for analytics
       allow read: if isOwner(resource.data.userId) || isAdmin();
 
-      // Only signed-in student can save covers under their own UID
-      allow create: if isSignedIn() &&
-        request.resource.data.userId == request.auth.uid &&
-        request.resource.data.keys().hasAll(['templateId', 'coverType', 'coverData', 'userId']);
+      // Only signed-in student can save covers under their own UID or verified legacy mongoId
+      allow create: if isSignedIn() && (
+        request.resource.data.userId == request.auth.uid ||
+        ('mongoId' in request.auth.token && request.resource.data.userId == request.auth.token.mongoId)
+      ) && request.resource.data.keys().hasAll(['templateId', 'coverType', 'coverData', 'userId']);
 
-      // Owner can update cover data (e.g. rename or edit draft data)
+      // Owner can update cover data (e.g. rename or edit draft data), cannot transfer ownership
       allow update: if isOwner(resource.data.userId) &&
         request.resource.data.userId == resource.data.userId;
 
@@ -90,7 +97,10 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────────────────
     match /drafts/{draftId} {
       allow read: if isOwner(resource.data.userId);
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && (
+        request.resource.data.userId == request.auth.uid ||
+        ('mongoId' in request.auth.token && request.resource.data.userId == request.auth.token.mongoId)
+      );
       allow update: if isOwner(resource.data.userId) && request.resource.data.userId == resource.data.userId;
       allow delete: if isOwner(resource.data.userId);
     }
@@ -100,7 +110,10 @@ service cloud.firestore {
     // ─────────────────────────────────────────────────────────────────────────
     match /labIndexRecords/{recordId} {
       allow read: if isOwner(resource.data.userId) || isAdmin();
-      allow create: if isSignedIn() && request.resource.data.userId == request.auth.uid;
+      allow create: if isSignedIn() && (
+        request.resource.data.userId == request.auth.uid ||
+        ('mongoId' in request.auth.token && request.resource.data.userId == request.auth.token.mongoId)
+      );
       allow update: if isOwner(resource.data.userId) && request.resource.data.userId == resource.data.userId;
       allow delete: if isOwner(resource.data.userId);
     }

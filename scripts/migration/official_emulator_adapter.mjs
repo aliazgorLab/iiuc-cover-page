@@ -18,6 +18,9 @@ export class OfficialFirestoreEmulatorAdapter {
     if (projectId === 'iiuccoverpage-8edd3') {
       throw new Error('[SAFETY CRITICAL] Official emulator adapter refuses to target production project ID.');
     }
+    if (host !== '127.0.0.1' && host !== 'localhost') {
+      throw new Error(`[SAFETY CRITICAL] Official emulator adapter refuses non-local host: ${host}`);
+    }
     this.projectId = projectId;
     this.host = host;
     this.port = port;
@@ -56,6 +59,7 @@ export class OfficialFirestoreEmulatorAdapter {
         method,
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': 'Bearer owner',
           ...(payload ? { 'Content-Length': Buffer.byteLength(payload) } : {}),
         },
       };
@@ -139,19 +143,37 @@ export class OfficialFirestoreEmulatorAdapter {
       };
     });
 
-    return await this._request(`${this.apiPrefix}:commit`, 'POST', { writes });
+    await this._request(`${this.apiPrefix}:commit`, 'POST', { writes });
+    return operations.map(() => ({ created: true }));
   }
 
   /**
-   * List all documents in a collection from official emulator
+   * List all documents in a collection from official emulator with pagination
    */
   async listDocuments(collectionName) {
-    try {
-      const res = await this._request(`${this.apiPrefix}/${collectionName}?pageSize=1000`);
-      return res.documents || [];
-    } catch (err) {
-      return [];
-    }
+    const allDocs = [];
+    let pageToken = '';
+    do {
+      try {
+        const query = pageToken ? `?pageSize=1000&pageToken=${pageToken}` : '?pageSize=1000';
+        const res = await this._request(`${this.apiPrefix}/${collectionName}${query}`);
+        if (res.documents && res.documents.length > 0) {
+          allDocs.push(...res.documents);
+        }
+        pageToken = res.nextPageToken || '';
+      } catch (err) {
+        break;
+      }
+    } while (pageToken);
+    return allDocs;
+  }
+
+  /**
+   * Count documents in a collection from official emulator
+   */
+  async countDocuments(collectionName) {
+    const docs = await this.listDocuments(collectionName);
+    return docs.length;
   }
 
   /**
